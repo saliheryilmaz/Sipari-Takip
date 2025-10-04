@@ -1,0 +1,62 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}Sipariş Sil{% endblock title %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">Sipariş Sil</h4>
+                <div class="page-title-right">
+                    <a href="{% url 'siparis-list' %}" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Geri Dön
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fa fa-exclamation-triangle fa-4x text-warning"></i>
+                    </div>
+                    
+                    <h4 class="text-center mb-4">Siparişi Silmek İstediğinizden Emin Misiniz?</h4>
+                    
+                    <div class="alert alert-warning">
+                        <h5>Sipariş Bilgileri:</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><strong>Sipariş No:</strong> {{ object.siparis_no }}</li>
+                            <li><strong>Cari:</strong> {{ object.cari.get_full_name }}</li>
+                            <li><strong>Tarih:</strong> {{ object.siparis_tarihi|date:"d.m.Y H:i" }}</li>
+                            <li><strong>Durum:</strong> {{ object.get_durum_display }}</li>
+                            <li><strong>Toplam:</strong> ₺{{ object.toplam_tutar|floatformat:2 }}</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-danger">
+                        <strong>Dikkat!</strong> Bu işlem geri alınamaz. Sipariş ve tüm kalemleri kalıcı olarak silinecektir.
+                    </div>
+                    
+                    <form method="post" class="text-center">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{% url 'siparis-list' %}" class="btn btn-secondary btn-lg">
+                                <i class="fa fa-times"></i> İptal
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fa fa-trash"></i> Evet, Sil
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

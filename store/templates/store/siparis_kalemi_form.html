@@ -1,0 +1,159 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Sipariş Kalemi Düzenle{% else %}Yeni Sipariş Kalemi{% endif %}
+{% endblock title %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">
+                    {% if object %}Sipariş Kalemi Düzenle{% else %}Yeni Sipariş Kalemi{% endif %}
+                </h4>
+                <div class="page-title-right">
+                    {% if object %}
+                        <a href="{% url 'siparis-detail' object.siparis.id %}" class="btn btn-secondary">
+                            <i class="fa fa-arrow-left"></i> Siparişe Dön
+                        </a>
+                    {% else %}
+                        <a href="{% url 'siparis-detail' siparis_id %}" class="btn btn-secondary">
+                            <i class="fa fa-arrow-left"></i> Siparişe Dön
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.urun.id_for_label }}" class="form-label">
+                                        {{ form.urun.label }}
+                                    </label>
+                                    {{ form.urun }}
+                                    {% if form.urun.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.urun.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="{{ form.adet.id_for_label }}" class="form-label">
+                                        {{ form.adet.label }}
+                                    </label>
+                                    {{ form.adet }}
+                                    {% if form.adet.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.adet.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="{{ form.birim_fiyat.id_for_label }}" class="form-label">
+                                        {{ form.birim_fiyat.label }}
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₺</span>
+                                        {{ form.birim_fiyat }}
+                                    </div>
+                                    {% if form.birim_fiyat.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.birim_fiyat.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="fa fa-info-circle"></i>
+                                    <strong>Bilgi:</strong> Toplam fiyat otomatik olarak hesaplanacaktır (Adet × Birim Fiyat).
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    {% if object %}
+                                        <a href="{% url 'siparis-detail' object.siparis.id %}" class="btn btn-secondary">
+                                            <i class="fa fa-times"></i> İptal
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'siparis-detail' siparis_id %}" class="btn btn-secondary">
+                                            <i class="fa fa-times"></i> İptal
+                                        </a>
+                                    {% endif %}
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa fa-save"></i> 
+                                        {% if object %}Güncelle{% else %}Oluştur{% endif %}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Ürün seçildiğinde birim fiyatı otomatik doldur
+document.getElementById('id_urun').addEventListener('change', function() {
+    const urunId = this.value;
+    if (urunId) {
+        // AJAX ile ürün fiyatını getir
+        fetch(`/api/urun-fiyat/${urunId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.price) {
+                    document.getElementById('id_birim_fiyat').value = data.price;
+                }
+            })
+            .catch(error => console.log('Fiyat bilgisi alınamadı:', error));
+    }
+});
+
+// Adet veya birim fiyat değiştiğinde toplam hesapla
+function calculateTotal() {
+    const adet = parseFloat(document.getElementById('id_adet').value) || 0;
+    const birimFiyat = parseFloat(document.getElementById('id_birim_fiyat').value) || 0;
+    const toplam = adet * birimFiyat;
+    
+    // Toplam fiyatı göster (eğer bir element varsa)
+    const toplamElement = document.getElementById('toplam-fiyat');
+    if (toplamElement) {
+        toplamElement.textContent = '₺' + toplam.toFixed(2);
+    }
+}
+
+document.getElementById('id_adet').addEventListener('input', calculateTotal);
+document.getElementById('id_birim_fiyat').addEventListener('input', calculateTotal);
+</script>
+{% endblock content %}

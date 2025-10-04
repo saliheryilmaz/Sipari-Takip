@@ -1,0 +1,25 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}Debug{% endblock title %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>Debug Sayfası</h1>
+    
+    <div class="row">
+        <div class="col-12">
+            <h3>URL Testleri:</h3>
+            <ul>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <h3>Mevcut URL: {{ request.resolver_match.url_name }}</h3>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+

@@ -1,0 +1,242 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}Sipariş Detayı - {{ siparis.siparis_no }}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">Sipariş Detayı: {{ siparis.siparis_no }}</h4>
+                <div class="page-title-right">
+                    <a href="{% url 'siparis-list' %}" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Geri Dön
+                    </a>
+                    <a href="{% url 'siparis-update' siparis.pk %}" class="btn btn-warning">
+                        <i class="fa fa-edit"></i> Düzenle
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sipariş Bilgileri -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Sipariş Bilgileri</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Sipariş No:</strong></td>
+                                    <td>{{ siparis.siparis_no }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cari:</strong></td>
+                                    <td>{{ siparis.cari.get_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Sipariş Tarihi:</strong></td>
+                                    <td>{{ siparis.siparis_tarihi|date:"d.m.Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Durum:</strong></td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if siparis.durum == 'BEKLEMEDE' %}bg-warning
+                                            {% elif siparis.durum == 'URUN_GELDI' %}bg-info
+                                            {% elif siparis.durum == 'KARGODA' %}bg-primary
+                                            {% elif siparis.durum == 'TESLIM_EDILDI' %}bg-success
+                                            {% elif siparis.durum == 'IPTAL' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ siparis.get_durum_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Son Dur:</strong></td>
+                                    <td>
+                                        {% if siparis.son_dur %}
+                                            <span class="badge bg-light text-dark">{{ siparis.get_son_dur_display }}</span>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ambar:</strong></td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if siparis.ambar == 'SATIS' %}bg-success
+                                            {% elif siparis.ambar == 'STOK' %}bg-info
+                                            {% else %}bg-warning{% endif %}">
+                                            {{ siparis.get_ambar_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fatura Durum:</strong></td>
+                                    <td>{{ siparis.get_fatura_durum_display }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ödeme:</strong></td>
+                                    <td>
+                                        {% if siparis.odeme %}
+                                            {{ siparis.get_odeme_display }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    {% if siparis.aciklama1 %}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6><strong>Açıklama:</strong></h6>
+                            <p class="text-muted">{{ siparis.aciklama1 }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Özet Bilgiler -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Özet Bilgiler</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <h3 class="text-primary">₺{{ siparis.toplam_tutar|floatformat:2 }}</h3>
+                        <p class="text-muted">Toplam Tutar</p>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between">
+                        <span>SMS Gönderildi:</span>
+                        <span>
+                            {% if siparis.sms_gonderildi %}
+                                <i class="fa fa-check text-success"></i> Evet
+                            {% else %}
+                                <i class="fa fa-times text-danger"></i> Hayır
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'siparis-kalemi-create' siparis.pk %}" class="btn btn-success">
+                            <i class="fa fa-plus"></i> Kalem Ekle
+                        </a>
+                        {% if not siparis.sms_gonderildi %}
+                        <button class="btn btn-info" onclick="sendSMS({{ siparis.pk }})">
+                            <i class="fa fa-sms"></i> SMS Gönder
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sipariş Kalemleri -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Sipariş Kalemleri</h5>
+                    <a href="{% url 'siparis-kalemi-create' siparis.pk %}" class="btn btn-sm btn-success">
+                        <i class="fa fa-plus"></i> Kalem Ekle
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if siparis.kalemler.all %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Ürün</th>
+                                    <th>Marka</th>
+                                    <th>Grup</th>
+                                    <th>Mevsim</th>
+                                    <th>Adet</th>
+                                    <th>Birim Fiyat</th>
+                                    <th>Toplam Fiyat</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for kalem in siparis.kalemler.all %}
+                                <tr>
+                                    <td>{{ kalem.urun.name }}</td>
+                                    <td>{{ kalem.urun.brand|default:"-" }}</td>
+                                    <td>{{ kalem.urun.group|default:"-" }}</td>
+                                    <td>{{ kalem.urun.season|default:"-" }}</td>
+                                    <td>{{ kalem.adet }}</td>
+                                    <td>₺{{ kalem.birim_fiyat|floatformat:2 }}</td>
+                                    <td><strong>₺{{ kalem.toplam_fiyat|floatformat:2 }}</strong></td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'siparis-kalemi-update' kalem.pk %}" 
+                                               class="btn btn-sm btn-outline-warning" title="Düzenle">
+                                                <i class="fa fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'siparis-kalemi-delete' kalem.pk %}" 
+                                               class="btn btn-sm btn-outline-danger" title="Sil"
+                                               onclick="return confirm('Bu kalemi silmek istediğinizden emin misiniz?')">
+                                                <i class="fa fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-primary">
+                                    <th colspan="6" class="text-end">Genel Toplam:</th>
+                                    <th>₺{{ siparis.toplam_tutar|floatformat:2 }}</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fa fa-shopping-cart fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Bu siparişte henüz kalem bulunmuyor.</p>
+                        <a href="{% url 'siparis-kalemi-create' siparis.pk %}" class="btn btn-success">
+                            <i class="fa fa-plus"></i> İlk Kalemi Ekle
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function sendSMS(siparisId) {
+    if (confirm('SMS gönderilsin mi?')) {
+        // Burada SMS gönderme işlemi yapılabilir
+        alert('SMS gönderme özelliği yakında eklenecek!');
+    }
+}
+</script>
+{% endblock content %}

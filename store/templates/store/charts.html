@@ -1,0 +1,430 @@
+<div class="row">
+    <div class="card shadow border-0 mb-7 col-md-6 col-lg-6">
+        <div class="card-body">
+            <h5 class="card-title">Lastik Satış Analizi (3D)</h5>
+            <div class="chart-container">
+                <canvas id="tireSales3DChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow border-0 mb-7 col-md-6 col-lg-6">
+        <div class="card-body">
+            <h5 class="card-title">Lastik Marka Dağılımı (3D Pie)</h5>
+            <div class="chart-container">
+                <canvas id="lastikMarkaChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="card shadow border-0 mb-7 col-md-6 col-lg-6">
+        <div class="card-body">
+            <h5 class="card-title">Ödeme Durum Dağılımı</h5>
+            <div class="chart-container">
+                <canvas id="odemeDurumChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow border-0 mb-7 col-md-6 col-lg-6">
+        <div class="card-body">
+            <h5 class="card-title">Sales Over Time</h5>
+            <div class="chart-container">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .chart-container {
+      position: relative;
+      height: 400px;
+      width: 100%;
+    }
+    
+    #tireSales3DChart, #lastikMarkaChart {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      padding: 25px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .card-title {
+      color: #2c3e50;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+  </style>
+  <script>
+    // Lastik Satış 3D Bar Chart
+    var ctxTireSales3D = document.getElementById('tireSales3DChart').getContext('2d');
+    
+    var tireSales3DChart = new Chart(ctxTireSales3D, {
+        type: 'bar',
+        data: {
+            labels: {{ seasons|safe }},
+            datasets: [
+                {
+                    label: 'Binek',
+                    data: {{ tire_sales_3d_data.0|safe }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                },
+                {
+                    label: 'Ticari',
+                    data: {{ tire_sales_3d_data.1|safe }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            return 'Mevsim: ' + tooltipItems[0].label;
+                        },
+                        label: function(tooltipItem) {
+                            return tooltipItem.dataset.label + ': ' + tooltipItem.raw.toLocaleString() + ' adet';
+                        }
+                    },
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 2,
+                    cornerRadius: 10,
+                    displayColors: true
+                },
+                title: {
+                    display: true,
+                    text: 'Lastik Satış Analizi - Mevsim ve Araç Tipi',
+                    font: {
+                        size: 18,
+                        weight: 'bold'
+                    },
+                    color: '#2c3e50',
+                    padding: 20
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Mevsim',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        color: '#2c3e50'
+                    },
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        color: '#2c3e50'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Satılan Adet',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        color: '#2c3e50'
+                    },
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#2c3e50',
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            animation: {
+                duration: 1500,
+                easing: 'easeInOutQuart',
+                delay: function(context) {
+                    return context.dataIndex * 100;
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            elements: {
+                bar: {
+                    borderWidth: 3,
+                    hoverBorderWidth: 5
+                }
+            }
+        }
+    });
+
+    // Lastik Marka 3D Pie Chart
+    var ctxLastikMarka = document.getElementById('lastikMarkaChart').getContext('2d');
+    var lastikMarkaChart = new Chart(ctxLastikMarka, {
+        type: 'doughnut',
+        data: {
+            labels: {{ lastik_marka_labels|safe }}.map(label => label.toUpperCase()),
+            datasets: [{
+                data: {{ lastik_marka_values|safe }},
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',
+                    'rgba(231, 233, 237, 0.8)',
+                    'rgba(142, 94, 162, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(255, 159, 64, 0.8)',
+                    'rgba(199, 199, 199, 0.8)',
+                    'rgba(83, 102, 255, 0.8)',
+                    'rgba(255, 99, 255, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(231, 233, 237, 1)',
+                    'rgba(142, 94, 162, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(83, 102, 255, 1)',
+                    'rgba(255, 99, 255, 1)'
+                ],
+                borderWidth: 3,
+                hoverOffset: 15,
+                hoverBorderWidth: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        },
+                        generateLabels: function(chart) {
+                            const data = chart.data;
+                            if (data.labels.length && data.datasets.length) {
+                                return data.labels.map((label, i) => {
+                                    const dataset = data.datasets[0];
+                                    const value = dataset.data[i];
+                                    const total = dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    
+                                    return {
+                                        text: `${label}: ${value} (${percentage}%)`,
+                                        fillStyle: dataset.backgroundColor[i],
+                                        strokeStyle: dataset.borderColor[i],
+                                        lineWidth: dataset.borderWidth,
+                                        pointStyle: 'circle',
+                                        hidden: false,
+                                        index: i
+                                    };
+                                });
+                            }
+                            return [];
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            return 'Marka: ' + tooltipItems[0].label.toUpperCase();
+                        },
+                        label: function(tooltipItem) {
+                            const value = tooltipItem.raw;
+                            const total = tooltipItem.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `Adet: ${value} (${percentage}%)`;
+                        }
+                    },
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    cornerRadius: 8
+                },
+                title: {
+                    display: true,
+                    text: 'Lastik Marka Dağılımı - 3D Pie Chart',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    color: '#333'
+                }
+            },
+            cutout: '50%',
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 2000,
+                easing: 'easeInOutQuart'
+            },
+            interaction: {
+                intersect: false
+            }
+        }
+    });
+
+    // Ödeme Durum Chart
+    var ctxOdemeDurum = document.getElementById('odemeDurumChart').getContext('2d');
+    var odemeDurumChart = new Chart(ctxOdemeDurum, {
+        type: 'bar',
+        data: {
+            labels: {{ lastik_odeme_labels|safe }}.map(label => label.toUpperCase()),
+            datasets: [{
+                label: 'Ödeme Durum',
+                data: {{ lastik_odeme_values|safe }},
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                borderColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            return 'Ödeme Durumu: ' + tooltipItems[0].label.toUpperCase();
+                        },
+                        label: function(tooltipItem) {
+                            return 'Adet: ' + tooltipItem.raw;
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Fatura Durum Dağılımı',
+                    font: {
+                        size: 16
+                    }
+                }
+            },
+            maintainAspectRatio: false
+        }
+    });
+
+    // Line Chart
+    var ctxLine = document.getElementById('lineChart').getContext('2d');
+    var lineChart = new Chart(ctxLine, {
+        type: 'line',
+        data: {
+            labels: {{ sale_dates_labels|safe }},
+            datasets: [{
+                label: 'Sales Over Time',
+                data: {{ sale_dates_values|safe }},
+                fill: false,
+                borderColor: '#4BC0C0',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            return 'Sales: ' + tooltipItem.raw;
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Sales Over Time',
+                    font: {
+                        size: 16
+                    }
+                }
+            },
+            maintainAspectRatio: false
+        }
+    });
+  </script>
+
+  <style>
+  .chart-container {
+    position: relative;
+    width: 100%;
+    height: 400px;
+  }
+
+  #lastikDurumChart, #lastikMarkaChart, #odemeDurumChart, #lineChart {
+    max-width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .chart-container {
+      height: 300px;
+    }
+    
+    .card {
+      margin-bottom: 1rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .chart-container {
+      height: 250px;
+    }
+    
+    .card-title {
+      font-size: 1rem;
+    }
+  }
+  </style>

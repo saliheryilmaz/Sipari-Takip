@@ -1,0 +1,50 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}Sipariş Takip Sistemi{% endblock title %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1>Sipariş Takip Sistemi</h1>
+            <p>Bu sayfa çalışıyor!</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Toplam Sipariş</h5>
+                    <h3>{{ toplam_siparis }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Bekleyen Siparişler</h5>
+                    <h3>{{ bekleyen_siparis }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Ürün Gelen</h5>
+                    <h3>{{ urun_gelen }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="{% url 'siparis-list' %}" class="btn btn-primary">Sipariş Listesi</a>
+            <a href="{% url 'siparis-create' %}" class="btn btn-success">Yeni Sipariş</a>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+

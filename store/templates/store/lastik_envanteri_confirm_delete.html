@@ -1,0 +1,116 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Lastik Envanteri Sil{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Ana Sayfa</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'lastik-dashboard' %}">Lastik Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'lastik-envanteri-list' %}">Lastik Envanteri</a></li>
+                        <li class="breadcrumb-item active">Sil</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Lastik Envanteri Sil</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title text-danger">Lastik Envanteri Silme Onayı</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h5 class="alert-heading">Dikkat!</h5>
+                        <p>Bu lastik envanteri kaydını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
+                    </div>
+
+                    <div class="card border">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Silinecek Kayıt Bilgileri</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-borderless table-sm">
+                                        <tr>
+                                            <td><strong>Cari (Firma):</strong></td>
+                                            <td>{{ object.cari }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Ürün:</strong></td>
+                                            <td>{{ object.urun|truncatechars:40 }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Marka:</strong></td>
+                                            <td>{{ object.marka }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Grup:</strong></td>
+                                            <td>{{ object.get_grup_display }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Mevsim:</strong></td>
+                                            <td>{{ object.get_mevsim_display }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-borderless table-sm">
+                                        <tr>
+                                            <td><strong>Adet:</strong></td>
+                                            <td>{{ object.adet }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Birim Fiyat:</strong></td>
+                                            <td>₺{{ object.birim_fiyat|floatformat:2 }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Toplam Fiyat:</strong></td>
+                                            <td><strong>₺{{ object.toplam_fiyat|floatformat:2 }}</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Durum:</strong></td>
+                                            <td>{{ object.get_durum_display }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Ambar:</strong></td>
+                                            <td>{{ object.get_ambar_display }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="mdi mdi-delete"></i> Evet, Sil
+                                </button>
+                                <a href="{% url 'lastik-envanteri-detail' object.pk %}" class="btn btn-secondary">
+                                    <i class="mdi mdi-arrow-left"></i> Hayır, Geri Dön
+                                </a>
+                                <a href="{% url 'lastik-envanteri-list' %}" class="btn btn-outline-secondary">
+                                    <i class="mdi mdi-list"></i> Listeye Dön
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,201 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block title %}Lastik Envanteri Detayı{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Ana Sayfa</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'lastik-dashboard' %}">Lastik Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'lastik-envanteri-list' %}">Lastik Envanteri</a></li>
+                        <li class="breadcrumb-item active">Detay</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Lastik Envanteri Detayı</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Lastik Envanteri Detayı</h4>
+                    <div class="card-actions">
+                        <a href="{% url 'lastik-envanteri-update' lastik.pk %}" class="btn btn-warning btn-sm">Düzenle</a>
+                        <a href="{% url 'lastik-envanteri-list' %}" class="btn btn-secondary btn-sm">Geri Dön</a>
+                        <button onclick="whatsappGonder({{ lastik.pk }})" class="btn btn-success btn-sm">WhatsApp Gönder</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Genel Bilgiler -->
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">Genel Bilgiler</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Cari (Firma):</strong></td>
+                                    <td>{{ lastik.cari }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ürün:</strong></td>
+                                    <td>{{ lastik.urun }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Marka:</strong></td>
+                                    <td>{{ lastik.marka }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Grup:</strong></td>
+                                    <td>
+                                        <span class="badge bg-{% if lastik.grup == 'BINEK' %}primary{% elif lastik.grup == 'TICARI' %}warning{% else %}info{% endif %}">
+                                            {{ lastik.get_grup_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Mevsim:</strong></td>
+                                    <td>
+                                        <span class="badge bg-{% if lastik.mevsim == 'YAZ' %}warning{% elif lastik.mevsim == 'KIS' %}info{% else %}success{% endif %}">
+                                            {{ lastik.get_mevsim_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Fiyat Bilgileri -->
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">Fiyat Bilgileri</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Adet:</strong></td>
+                                    <td>{{ lastik.adet }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Birim Fiyat:</strong></td>
+                                    <td>{{ lastik.birim_fiyat|turkish_currency }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Toplam Fiyat:</strong></td>
+                                    <td><strong class="text-success">{{ lastik.toplam_fiyat|turkish_currency }}</strong></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <!-- Durum Bilgileri -->
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">Durum Bilgileri</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Durum:</strong></td>
+                                    <td>
+                                        <span class="badge bg-{% if lastik.durum == 'URUN_GELDI' %}success{% elif lastik.durum == 'BEKLEMEDE' %}warning{% elif lastik.durum == 'YOLDA' %}info{% else %}secondary{% endif %}">
+                                            {{ lastik.get_durum_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ambar:</strong></td>
+                                    <td>
+                                        <span class="badge bg-{% if lastik.ambar == 'STOK' %}primary{% else %}success{% endif %}">
+                                            {{ lastik.get_ambar_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Ödeme ve SMS Bilgileri -->
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">Ödeme ve İletişim</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Ödeme:</strong></td>
+                                    <td>{{ lastik.get_odeme_display|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>SMS Gönderildi:</strong></td>
+                                    <td>
+                                        {% if lastik.sms_gonderildi %}
+                                            <span class="badge bg-success">Gönderildi</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Gönderilmedi</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Açıklama -->
+                    {% if lastik.aciklama1 %}
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">Açıklama</h5>
+                            <div class="alert alert-info">
+                                {{ lastik.aciklama1 }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Tarih Bilgileri -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">Tarih Bilgileri</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Oluşturma Tarihi:</strong></td>
+                                    <td>{{ lastik.olusturma_tarihi|date:"d.m.Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Son İşlem Tarihi:</strong></td>
+                                    <td>{{ lastik.guncelleme_tarihi|date:"d.m.Y H:i" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function whatsappGonder(lastikId) {
+    fetch(`/lastik-envanteri/${lastikId}/whatsapp/`, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.open(data.whatsapp_url, '_blank');
+        } else {
+            alert('Hata: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Bir hata oluştu');
+    });
+}
+</script>
+{% endblock %}
+

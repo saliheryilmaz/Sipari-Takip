@@ -1,0 +1,24 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}Test Sipariş{% endblock title %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>Sipariş Takip Sistemi Test</h1>
+    <p>Bu sayfa çalışıyorsa template sistemi doğru çalışıyor.</p>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Test Başarılı!</h5>
+                    <p class="card-text">Sipariş takip sistemi template'leri çalışıyor.</p>
+                    <a href="{% url 'siparis-list' %}" class="btn btn-primary">Sipariş Listesine Git</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
