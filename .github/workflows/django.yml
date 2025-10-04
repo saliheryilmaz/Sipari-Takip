@@ -30,12 +30,18 @@ jobs:
       run: pip install --upgrade pip
 
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: |
+        pip install -r requirements.txt
+        pip list
 
     - name: Set up environment variables
       run: |
         echo "DEBUG=False" >> $GITHUB_ENV
         echo "SECRET_KEY=django-insecure-g_n2+2bznu6e@1wel!i(&-4tp86_7lop5395ww+i4x%9*7^old" >> $GITHUB_ENV
+
+    - name: Check if whitenoise is installed
+      run: |
+        python -c "import whitenoise; print('WhiteNoise version:', whitenoise.__version__)"
 
     - name: Make Migrations
       run: python manage.py makemigrations

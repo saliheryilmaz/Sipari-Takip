@@ -722,7 +722,8 @@ def whatsapp_gonder(request, lastik_id):
         """
         
         # WhatsApp URL oluştur
-        whatsapp_url = f"https://wa.me/?text={mesaj.replace(' ', '%20').replace('\n', '%0A')}"
+        mesaj_encoded = mesaj.replace(' ', '%20').replace('\n', '%0A')
+        whatsapp_url = f"https://wa.me/?text={mesaj_encoded}"
         
         # SMS gönderildi olarak işaretle
         lastik.sms_gonderildi = True
