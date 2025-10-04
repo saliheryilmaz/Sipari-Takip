@@ -11,12 +11,20 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: '3.11'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     - name: Upgrade pip
       run: pip install --upgrade pip
@@ -24,8 +32,19 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
+    - name: Set up environment variables
+      run: |
+        echo "DEBUG=False" >> $GITHUB_ENV
+        echo "SECRET_KEY=django-insecure-g_n2+2bznu6e@1wel!i(&-4tp86_7lop5395ww+i4x%9*7^old" >> $GITHUB_ENV
+
     - name: Make Migrations
-      run: python3 manage.py makemigrations
+      run: python manage.py makemigrations
 
     - name: Apply Migrations
-      run: python3 manage.py migrate
+      run: python manage.py migrate
+
+    - name: Collect Static Files
+      run: python manage.py collectstatic --noinput
+
+    - name: Run Tests
+      run: python manage.py check
