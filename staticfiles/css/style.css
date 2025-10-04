@@ -1,0 +1,412 @@
+/* Importing Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .container-fluid {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+
+@media (max-width: 992px) {
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0 !important;
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar.show {
+    transform: translateX(0);
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .btn-group .btn {
+    margin-bottom: 0.25rem;
+  }
+  
+  .table td, .table th {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.875rem;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .breadcrumb {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .container-fluid {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  
+  .card-body {
+    padding: 0.75rem;
+  }
+  
+  .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .btn-group {
+    flex-direction: column;
+  }
+  
+  .btn-group .btn {
+    margin-right: 0;
+  }
+  
+  .table-responsive {
+    font-size: 0.75rem;
+  }
+  
+  .page-title {
+    font-size: 1.25rem;
+  }
+  
+  .navbar-brand {
+    font-size: 16px !important;
+  }
+  
+  .form-control, .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Mobile-first approach for forms */
+@media (max-width: 768px) {
+  .form-row .col-md-3,
+  .form-row .col-md-6,
+  .form-row .col-md-4 {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Chart responsiveness */
+@media (max-width: 768px) {
+  .chart-container {
+    height: 300px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .chart-container {
+    height: 250px !important;
+  }
+}
+
+/* Root variables */
+:root {
+  --dk-gray-100: #f3f4f6;
+  --dk-gray-200: #e5e7eb;
+  --dk-gray-300: #d1d5db;
+  --dk-gray-400: #9ca3af;
+  --dk-gray-500: #6b7280;
+  --dk-gray-600: #4b5563;
+  --dk-gray-700: #374151;
+  --dk-gray-800: #1f2937;
+  --dk-gray-900: #111827;
+  --dk-dark-bg: #313348;
+  --dk-darker-bg: #2a2b3d;
+  --navbar-bg-color: #6f6486;
+  --sidebar-bg-color: #252636;
+  --sidebar-width: 250px;
+  --sidebar-expanded-width: 230px;
+  --sidebar-collapsed-width: 100px;
+  --sidebar-header-bg: #212529;
+  --nav-link-color: #adb5bd;
+  --nav-link-active-bg: #495057;
+  --dropdown-menu-bg: #495057;
+  --dropdown-item-color: #adb5bd;
+  --dropdown-item-active-bg: #6c757d;
+  --sidebar-separator-bg: #595e59;
+  --logo-separator-height: 60px;
+  --sidebar-item-height: 50px;
+  --submenu-item-height: 45px;
+}
+
+/* General styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background-color: #fff;
+}
+
+/* Global büyük harf dönüşümü - tüm yazılar otomatik büyük harfle gösterilir */
+* {
+  text-transform: uppercase !important;
+}
+
+/* Özel durumlar - büyük harf dönüşümü istemediğimiz alanlar */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+textarea,
+.form-control,
+.form-select,
+.navbar-brand,
+.page-title,
+h1, h2, h3, h4, h5, h6,
+.breadcrumb,
+.dropdown-menu,
+.tooltip,
+.popover,
+.alert,
+.modal-title,
+.card-title,
+.btn,
+.badge,
+.small,
+.text-muted,
+.text-secondary,
+.text-light,
+.text-white,
+.lead,
+.display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
+  text-transform: none !important;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* Wrapper */
+#wrapper {
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.3s ease-in-out;
+}
+
+#wrapper.fullwidth {
+  margin-left: 0;
+}
+
+/* Sidebar */
+.sidebar {
+  font-size: 0.925rem;
+  background-color: var(--sidebar-bg-color);
+  width: var(--sidebar-width);
+  transition: width 0.3s ease-in-out;
+  z-index: 9999999;
+}
+
+.sidebar .close-aside {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  cursor: pointer;
+  color: #eee;
+}
+
+.sidebar .sidebar-header {
+  background-color: var(--sidebar-header-bg);
+  border-bottom: 1px solid #2a2b3c;
+}
+
+.sidebar .sidebar-header h5 a,
+.sidebar .sidebar-header p {
+  color: var(--dk-gray-300);
+  font-size: 0.825rem;
+}
+
+.sidebar .search .form-control ~ i {
+  color: #2b2f3a;
+  right: 40px;
+  top: 22px;
+}
+
+.sidebar > ul > li {
+  padding: 0.7rem 1.75rem;
+}
+
+.sidebar ul > li > a {
+  color: var(--dk-gray-400);
+  text-decoration: none;
+}
+
+/* Menu items */
+#sidebar-container .list-group a {
+  height: var(--sidebar-item-height);
+  color: white;
+}
+
+/* Submenu items */
+#sidebar-container .list-group li.list-group-item {
+  background-color: var(--sidebar-bg-color);
+}
+
+#sidebar-container .list-group .sidebar-submenu a {
+  height: var(--submenu-item-height);
+  padding-left: 30px;
+}
+
+/* Separators */
+.sidebar-separator-title,
+.sidebar-separator,
+.logo-separator {
+  background-color: var(--sidebar-separator-bg);
+}
+
+.sidebar-separator-title {
+  height: 35px;
+}
+
+.sidebar-separator {
+  height: 25px;
+}
+
+.logo-separator {
+  height: var(--logo-separator-height);
+}
+
+/* Navbar */
+.navbar {
+  border: none;
+  background-color: var(--navbar-bg-color);
+}
+
+.navbar .dropdown-menu {
+  right: auto;
+  left: 0;
+}
+
+.navbar .navbar-nav > li > a {
+  color: #eee;
+  line-height: 55px;
+  padding: 0 10px;
+}
+
+.navbar .navbar-brand {
+  color: #fff;
+  line-height: 55px;
+  padding: 0;
+}
+
+.navbar .navbar-nav > li > a:focus,
+.navbar .navbar-nav > li > a:hover {
+  color: #eee;
+}
+
+.navbar .navbar-nav > .open > a,
+.navbar .navbar-nav > .open > a:focus,
+.navbar .navbar-nav > .open > a:hover {
+  background-color: transparent;
+  color: #fff;
+}
+
+.navbar .navbar-brand:focus,
+.navbar .navbar-brand:hover {
+  color: #fff;
+}
+
+.navbar > .container .navbar-brand,
+.navbar > .container-fluid .navbar-brand {
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .navbar > .container-fluid .navbar-brand {
+    margin-left: 15px;
+  }
+
+  .navbar .navbar-nav > li > a {
+    padding-left: 0;
+  }
+
+  .navbar-nav {
+    margin: 0;
+  }
+
+  .navbar .navbar-collapse,
+  .navbar .navbar-form {
+    border: none;
+  }
+}
+
+.navbar .navbar-nav > li > a {
+  float: left;
+}
+
+.navbar .navbar-nav > li > a > span:not(.caret) {
+  background-color: #e74c3c;
+  border-radius: 50%;
+  height: 25px;
+  width: 25px;
+  padding: 2px;
+  font-size: 11px;
+  position: relative;
+  top: -10px;
+  right: 5px;
+}
+
+.dropdown-menu > li > a {
+  padding-top: 5px;
+  padding-right: 5px;
+}
+
+.navbar .navbar-nav > li > a > i {
+  font-size: 18px;
+}
+
+/* Navbar için özel gri renk - sadece MeslasOtomotiv banner'ı için */
+.navbar.bg-success {
+    background-color: #6b7280 !important;
+}
+
+/* Sidebar dropdown menü stilleri */
+.sidebar .dropdown-menu {
+    display: none;
+    position: static;
+    float: none;
+    width: 100%;
+    margin-top: 0;
+    background-color: #495057;
+    border: 0;
+    box-shadow: none;
+}
+
+.sidebar .dropdown-menu.show {
+    display: block;
+}
+
+.sidebar .dropdown-item {
+    padding: 8px 20px;
+    color: #adb5bd;
+    border: none;
+}
+
+.sidebar .dropdown-item:hover,
+.sidebar .dropdown-item.active {
+    background-color: #6c757d;
+    color: #fff;
+}
