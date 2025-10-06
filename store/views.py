@@ -108,10 +108,14 @@ def dashboard(request):
     lastik_marka_labels = [item["marka"] for item in lastik_marka_counts]
     lastik_marka_values = [item["count"] for item in lastik_marka_counts]
     
-    # Lastik ödeme durum dağılımı
-    lastik_odeme_counts = lastik_envanteri.values("odeme").annotate(count=Count("id"))
+    # Lastik ödeme durum dağılımı - toplam fiyat ile
+    lastik_odeme_counts = lastik_envanteri.values("odeme").annotate(
+        count=Count("id"),
+        total_price=Sum("toplam_fiyat")
+    )
     lastik_odeme_labels = [item["odeme"] or "Belirtilmemiş" for item in lastik_odeme_counts]
     lastik_odeme_values = [item["count"] for item in lastik_odeme_counts]
+    lastik_odeme_prices = [float(item["total_price"] or 0) for item in lastik_odeme_counts]
     
     # Lastik satış verileri - mevsim ve araç tipine göre
     # Doğrudan LastikEnvanteri tablosundan çek
@@ -181,6 +185,7 @@ def dashboard(request):
         "lastik_marka_values": lastik_marka_values,
         "lastik_odeme_labels": lastik_odeme_labels,
         "lastik_odeme_values": lastik_odeme_values,
+        "lastik_odeme_prices": lastik_odeme_prices,
         # 3D bar chart verileri
         "tire_sales_3d_data": tire_sales_3d_data,
         "seasons": seasons,
