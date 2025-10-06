@@ -19,6 +19,21 @@ PORT = os.environ.get('PORT', 8000)
 
 ALLOWED_HOSTS = ['*']  # Geçici olarak tüm hostlara izin ver
 
+# CSRF Trusted Origins - Railway için
+CSRF_TRUSTED_ORIGINS = [
+    'https://web-production-17c9.up.railway.app',
+    'https://*.railway.app',
+    'https://*.up.railway.app',
+    'https://*.render.com',
+    'https://*.herokuapp.com',
+    'https://*.vercel.app',
+]
+
+# CSRF Cookie ayarları
+CSRF_COOKIE_SECURE = False  # HTTP için geçici olarak False
+CSRF_COOKIE_HTTPONLY = False  # JavaScript erişimi için
+CSRF_COOKIE_SAMESITE = 'Lax'  # Cross-site istekler için
+
 
 # Application definition
 
@@ -157,22 +172,22 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# Production Security Settings
-if not DEBUG:
-    # HTTPS ayarları
-    SECURE_SSL_REDIRECT = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    
-    # Güvenlik başlıkları
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_BROWSER_XSS_FILTER = True
-    X_FRAME_OPTIONS = 'DENY'
-    
-    # Session güvenliği
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_HTTPONLY = True
-    CSRF_COOKIE_HTTPONLY = True
+# Production Security Settings - Geçici olarak kapatıldı
+# if not DEBUG:
+#     # HTTPS ayarları
+#     SECURE_SSL_REDIRECT = True
+#     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#     SECURE_HSTS_SECONDS = 31536000
+#     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+#     SECURE_HSTS_PRELOAD = True
+#     
+#     # Güvenlik başlıkları
+#     SECURE_CONTENT_TYPE_NOSNIFF = True
+#     SECURE_BROWSER_XSS_FILTER = True
+#     X_FRAME_OPTIONS = 'DENY'
+#     
+#     # Session güvenliği
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_SECURE = True
+#     SESSION_COOKIE_HTTPONLY = True
+#     CSRF_COOKIE_HTTPONLY = True
