@@ -152,11 +152,11 @@ def profile_update(request):
     )
 
 
-class ProfileListView(LoginRequiredMixin, ExportMixin, SingleTableView):
+class ProfileListView(LoginRequiredMixin, UserPassesTestMixin, ExportMixin, SingleTableView):
     """
     Display a list of profiles in a table format.
-    Requires user to be logged in
-    and supports exporting the table data.
+    Requires user to be logged in and be a superuser.
+    Supports exporting the table data.
     Pagination is applied with 10 profiles per page.
     """
     model = Profile
@@ -165,6 +165,13 @@ class ProfileListView(LoginRequiredMixin, ExportMixin, SingleTableView):
     table_class = ProfileTable
     paginate_by = 10
     table_pagination = False
+
+    def test_func(self):
+        """
+        Check if the user is a superuser.
+        Only superusers can view all staff.
+        """
+        return self.request.user.is_superuser
 
 
 class ProfileCreateView(LoginRequiredMixin, CreateView):
