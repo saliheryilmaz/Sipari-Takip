@@ -103,10 +103,10 @@ def dashboard(request):
     lastik_durum_labels = [item["durum"] for item in lastik_durum_counts]
     lastik_durum_values = [item["count"] for item in lastik_durum_counts]
     
-    # Lastik marka dağılımı
-    lastik_marka_counts = lastik_envanteri.values("marka").annotate(count=Count("id"))
+    # Lastik marka dağılımı - toplam adet ile
+    lastik_marka_counts = lastik_envanteri.values("marka").annotate(total_adet=Sum("adet"))
     lastik_marka_labels = [item["marka"] for item in lastik_marka_counts]
-    lastik_marka_values = [item["count"] for item in lastik_marka_counts]
+    lastik_marka_values = [item["total_adet"] for item in lastik_marka_counts]
     
     # Lastik ödeme durum dağılımı - toplam fiyat ile
     lastik_odeme_counts = lastik_envanteri.values("odeme").annotate(
