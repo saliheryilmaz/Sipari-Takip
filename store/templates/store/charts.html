@@ -9,7 +9,7 @@
     </div>
     <div class="card shadow border-0 mb-7 col-md-6 col-lg-6">
         <div class="card-body">
-            <h5 class="card-title">Lastik Marka Dağılımı (3D Pie)</h5>
+            <h5 class="card-title">Lastik Marka Dağılımı (Toplam Adet)</h5>
             <div class="chart-container">
                 <canvas id="lastikMarkaChart"></canvas>
             </div>
@@ -198,13 +198,14 @@
         }
     });
 
-    // Lastik Marka 3D Pie Chart
+    // Lastik Marka Pie Chart - Toplam Adet ile
     var ctxLastikMarka = document.getElementById('lastikMarkaChart').getContext('2d');
     var lastikMarkaChart = new Chart(ctxLastikMarka, {
-        type: 'doughnut',
+        type: 'pie',
         data: {
             labels: {{ lastik_marka_labels|safe }}.map(label => label.toUpperCase()),
             datasets: [{
+                label: 'Lastik Adedi',
                 data: {{ lastik_marka_values|safe }},
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.8)',
@@ -281,10 +282,10 @@
                             const value = tooltipItem.raw;
                             const total = tooltipItem.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = ((value / total) * 100).toFixed(1);
-                            return `Adet: ${value} (${percentage}%)`;
+                            return `Toplam Adet: ${value.toLocaleString('tr-TR')} (${percentage}%)`;
                         }
                     },
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
                     titleColor: 'white',
                     bodyColor: 'white',
                     borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -293,7 +294,7 @@
                 },
                 title: {
                     display: true,
-                    text: 'Lastik Marka Dağılımı - 3D Pie Chart',
+                    text: 'Lastik Marka Dağılımı - Toplam Adet',
                     font: {
                         size: 16,
                         weight: 'bold'
