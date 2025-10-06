@@ -85,6 +85,8 @@ def user_management(request):
             messages.error(request, f'Kullanıcı adı "{username}" zaten mevcut!')
         elif User.objects.filter(email=email).exists():
             messages.error(request, f'E-posta "{email}" zaten kullanılıyor!')
+        elif len(password) < 6:
+            messages.error(request, 'Şifre en az 6 karakter olmalıdır!')
         else:
             try:
                 # Create user
@@ -96,12 +98,20 @@ def user_management(request):
                     last_name=last_name
                 )
                 
-                # Create profile
-                Profile.objects.create(
+                # Create profile (if not exists)
+                profile, created = Profile.objects.get_or_create(
                     user=user,
-                    role=role,
-                    status='A'
+                    defaults={
+                        'role': role,
+                        'status': 'A'
+                    }
                 )
+                
+                if not created:
+                    # Update existing profile
+                    profile.role = role
+                    profile.status = 'A'
+                    profile.save()
                 
                 messages.success(request, f'Kullanıcı "{username}" başarıyla oluşturuldu!')
             except Exception as e:
