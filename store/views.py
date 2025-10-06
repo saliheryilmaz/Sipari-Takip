@@ -49,9 +49,9 @@ from .forms import LastikEnvanteriForm
 
 
 def test_view(request):
-    """Test view for Railway healthcheck"""
-    from django.http import JsonResponse
-    return JsonResponse({"status": "ok", "message": "MESTakip is running!"})
+    """Test view for Railway healthcheck - redirect to login"""
+    from django.shortcuts import redirect
+    return redirect('user-login')
 
 @login_required
 def dashboard(request):
