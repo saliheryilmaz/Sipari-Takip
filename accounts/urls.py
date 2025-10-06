@@ -24,12 +24,13 @@ from .views import (
 
 urlpatterns = [
     # User authentication URLs
-    path('register/', user_views.register, name='user-register'),
+    # path('register/', user_views.register, name='user-register'),  # Kaldırıldı
     path('login/', auth_views.LoginView.as_view(
         template_name='accounts/login.html'), name='user-login'),
     path('profile/', user_views.profile, name='user-profile'),
     path('profile/update/', user_views.profile_update,
          name='user-profile-update'),
+    path('user-management/', user_views.user_management, name='user-management'),
     path('logout/', auth_views.LogoutView.as_view(
         template_name='accounts/logout.html'), name='user-logout'),
 

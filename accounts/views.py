@@ -59,6 +59,49 @@ def profile(request):
 
 
 @login_required
+def user_management(request):
+    """
+    Admin panel for user management.
+    Only superusers can access this page.
+    """
+    if not request.user.is_superuser:
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        # Create new user
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        first_name = request.POST.get('first_name', '')
+        last_name = request.POST.get('last_name', '')
+        role = request.POST.get('role', 'OP')
+        
+        try:
+            # Create user
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+            
+            # Create profile
+            Profile.objects.create(
+                user=user,
+                role=role,
+                status='A'
+            )
+            
+            messages.success(request, f'Kullanıcı "{username}" başarıyla oluşturuldu!')
+        except Exception as e:
+            messages.error(request, f'Hata: {str(e)}')
+    
+    profiles = Profile.objects.all()
+    return render(request, 'accounts/user_management.html', {'profiles': profiles})
+
+
+@login_required
 def profile_update(request):
     """
     Handle profile update.

@@ -22,6 +22,7 @@ ALLOWED_HOSTS = ['*']  # Geçici olarak tüm hostlara izin ver
 # CSRF Trusted Origins - Railway için
 CSRF_TRUSTED_ORIGINS = [
     'https://web-production-17c9.up.railway.app',
+    'https://mestakip-production-xxxxx.up.railway.app',  # Yeni URL
     'https://*.railway.app',
     'https://*.up.railway.app',
     'https://*.render.com',

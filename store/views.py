@@ -55,16 +55,26 @@ def test_view(request):
 
 @login_required
 def dashboard(request):
-    profiles = Profile.objects.all()
+    # Kullanıcı veri izolasyonu
+    current_user = request.user
+    
+    # Admin ise tüm verileri göster, değilse sadece kendi verilerini
+    if current_user.is_superuser or current_user.profile.role == 'AD':
+        profiles = Profile.objects.all()
+        items = Item.objects.all()
+        profiles_count = profiles.count()
+    else:
+        # Normal kullanıcı sadece kendi verilerini görür
+        profiles = Profile.objects.filter(user=current_user)
+        items = Item.objects.filter(created_by=current_user) if hasattr(Item, 'created_by') else Item.objects.none()
+        profiles_count = 1  # Sadece kendisi
+    
     Category.objects.annotate(nitem=Count("item"))
-    items = Item.objects.all()
     total_items = (
-        Item.objects.all()
-        .aggregate(Sum("quantity"))
+        items.aggregate(Sum("quantity"))
         .get("quantity__sum", 0.00)
     )
     items_count = items.count()
-    profiles_count = profiles.count()
 
     # Prepare data for charts
     category_counts = Category.objects.annotate(

@@ -1,0 +1,147 @@
+{% extends 'store/base.html' %}
+{% block title %}Kullanıcı Yönetimi{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-users"></i> Kullanıcı Yönetimi
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Kullanıcı Oluşturma Formu -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Yeni Kullanıcı Oluştur</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Kullanıcı Adı</label>
+                                                    <input type="text" name="username" class="form-control" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>E-posta</label>
+                                                    <input type="email" name="email" class="form-control" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Şifre</label>
+                                                    <input type="password" name="password" class="form-control" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Rol</label>
+                                                    <select name="role" class="form-control">
+                                                        <option value="OP">Operatör</option>
+                                                        <option value="EX">Yönetici</option>
+                                                        <option value="AD">Admin</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Ad</label>
+                                                    <input type="text" name="first_name" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Soyad</label>
+                                                    <input type="text" name="last_name" class="form-control">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-plus"></i> Kullanıcı Oluştur
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mevcut Kullanıcılar -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Mevcut Kullanıcılar</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Kullanıcı Adı</th>
+                                                    <th>E-posta</th>
+                                                    <th>Ad Soyad</th>
+                                                    <th>Rol</th>
+                                                    <th>Durum</th>
+                                                    <th>Son Giriş</th>
+                                                    <th>İşlemler</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for profile in profiles %}
+                                                <tr>
+                                                    <td>{{ profile.user.username }}</td>
+                                                    <td>{{ profile.user.email }}</td>
+                                                    <td>{{ profile.user.get_full_name }}</td>
+                                                    <td>
+                                                        {% if profile.role == 'AD' %}
+                                                            <span class="badge badge-danger">Admin</span>
+                                                        {% elif profile.role == 'EX' %}
+                                                            <span class="badge badge-warning">Yönetici</span>
+                                                        {% else %}
+                                                            <span class="badge badge-info">Operatör</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if profile.status == 'A' %}
+                                                            <span class="badge badge-success">Aktif</span>
+                                                        {% else %}
+                                                            <span class="badge badge-secondary">Pasif</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ profile.user.last_login|date:"d.m.Y H:i" }}</td>
+                                                    <td>
+                                                        <a href="{% url 'profile-update' profile.id %}" class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <a href="{% url 'profile-delete' profile.id %}" class="btn btn-sm btn-danger">
+                                                            <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
