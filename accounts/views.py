@@ -77,26 +77,34 @@ def user_management(request):
         last_name = request.POST.get('last_name', '')
         role = request.POST.get('role', 'OP')
         
-        try:
-            # Create user
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password,
-                first_name=first_name,
-                last_name=last_name
-            )
-            
-            # Create profile
-            Profile.objects.create(
-                user=user,
-                role=role,
-                status='A'
-            )
-            
-            messages.success(request, f'Kullanıcı "{username}" başarıyla oluşturuldu!')
-        except Exception as e:
-            messages.error(request, f'Hata: {str(e)}')
+        # Validation
+        if not username or not email or not password:
+            messages.error(request, 'Kullanıcı adı, e-posta ve şifre zorunludur!')
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, f'Kullanıcı adı "{username}" zaten mevcut!')
+        elif User.objects.filter(email=email).exists():
+            messages.error(request, f'E-posta "{email}" zaten kullanılıyor!')
+        else:
+            try:
+                # Create user
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name
+                )
+                
+                # Create profile
+                Profile.objects.create(
+                    user=user,
+                    role=role,
+                    status='A'
+                )
+                
+                messages.success(request, f'Kullanıcı "{username}" başarıyla oluşturuldu!')
+            except Exception as e:
+                messages.error(request, f'Hata: {str(e)}')
     
     profiles = Profile.objects.all()
     return render(request, 'accounts/user_management.html', {'profiles': profiles})
