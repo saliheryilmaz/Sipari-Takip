@@ -48,6 +48,11 @@ from .lastik_tables import LastikEnvanteriTable
 from .forms import LastikEnvanteriForm
 
 
+def test_view(request):
+    """Test view for Railway healthcheck"""
+    from django.http import JsonResponse
+    return JsonResponse({"status": "ok", "message": "MESTakip is running!"})
+
 @login_required
 def dashboard(request):
     profiles = Profile.objects.all()

@@ -38,7 +38,8 @@ from .views import (
 # URL patterns
 urlpatterns = [
     # Dashboard
-    path('', views.dashboard, name='dashboard'),
+    path('', views.test_view, name='test'),
+    path('dashboard/', views.dashboard, name='dashboard'),
 
     # Product URLs
     path(

@@ -12,21 +12,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-g_n2+2bznu6e@1wel!i(&-4tp86_7lop5395ww+i4x%9*7^old')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'  # Geçici olarak True
 
 # Railway PORT ayarı
 PORT = os.environ.get('PORT', 8000)
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '.railway.app',
-    '.render.com',
-    '.herokuapp.com',
-    '.vercel.app',
-    '.netlify.app',
-    # Kendi domain'inizi buraya ekleyin
-]
+ALLOWED_HOSTS = ['*']  # Geçici olarak tüm hostlara izin ver
 
 
 # Application definition
