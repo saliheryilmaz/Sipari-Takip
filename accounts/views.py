@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy, reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.contrib import messages
 
 # Authentication and permissions
 from django.contrib.auth.decorators import login_required
