@@ -9,17 +9,25 @@ class SaleAdmin(admin.ModelAdmin):
     """
     list_display = (
         'id',
+        'user',
         'customer',
         'date_added',
         'grand_total',
         'amount_paid',
         'amount_change'
     )
-    search_fields = ('customer__name', 'id')
-    list_filter = ('date_added', 'customer')
+    search_fields = ('customer__first_name', 'customer__last_name', 'id')
+    list_filter = ('user', 'date_added', 'customer')
     ordering = ('-date_added',)
     readonly_fields = ('date_added',)
     date_hierarchy = 'date_added'
+
+    def get_queryset(self, request):
+        """Admin sees all sales, regular users see only their own."""
+        qs = super().get_queryset(request)
+        if request.user.is_superuser or request.user.profile.role == 'AD':
+            return qs
+        return qs.filter(user=request.user)
 
     def save_model(self, request, obj, form, change):
         """
@@ -59,6 +67,7 @@ class PurchaseAdmin(admin.ModelAdmin):
     """
     list_display = (
         'slug',
+        'user',
         'item',
         'vendor',
         'order_date',
@@ -69,9 +78,16 @@ class PurchaseAdmin(admin.ModelAdmin):
         'delivery_status'
     )
     search_fields = ('item__name', 'vendor__name', 'slug')
-    list_filter = ('order_date', 'vendor', 'delivery_status')
+    list_filter = ('user', 'order_date', 'vendor', 'delivery_status')
     ordering = ('-order_date',)
     readonly_fields = ('total_value',)
+
+    def get_queryset(self, request):
+        """Admin sees all purchases, regular users see only their own."""
+        qs = super().get_queryset(request)
+        if request.user.is_superuser or request.user.profile.role == 'AD':
+            return qs
+        return qs.filter(user=request.user)
 
     def save_model(self, request, obj, form, change):
         """

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from model_utils.models import TimeStampedModel, SoftDeletableModel
+from model_utils.managers import SoftDeletableManager
 
 from django_extensions.db.fields import AutoSlugField
 from imagekit.models import ProcessedImageField
@@ -90,10 +92,11 @@ class Profile(models.Model):
         verbose_name_plural = 'Profiles'
 
 
-class Vendor(models.Model):
+class Vendor(SoftDeletableModel, TimeStampedModel):
     """
     Represents a vendor with contact and address information.
     """
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Kullanıcı')
     name = models.CharField(max_length=50, verbose_name='Name')
     slug = AutoSlugField(
         unique=True,
@@ -106,6 +109,10 @@ class Vendor(models.Model):
     address = models.CharField(
         max_length=50, blank=True, null=True, verbose_name='Address'
     )
+    
+    # Soft delete için custom manager
+    objects = SoftDeletableManager()
+    all_objects = models.Manager()
 
     def __str__(self):
         """
@@ -119,13 +126,18 @@ class Vendor(models.Model):
         verbose_name_plural = 'Vendors'
 
 
-class Customer(models.Model):
+class Customer(SoftDeletableModel, TimeStampedModel):
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Kullanıcı')
     first_name = models.CharField(max_length=256)
     last_name = models.CharField(max_length=256, blank=True, null=True)
     address = models.TextField(max_length=256, blank=True, null=True)
     email = models.EmailField(max_length=256, blank=True, null=True)
     phone = models.CharField(max_length=30, blank=True, null=True)
     loyalty_points = models.IntegerField(default=0)
+    
+    # Soft delete için custom manager
+    objects = SoftDeletableManager()
+    all_objects = models.Manager()
 
     class Meta:
         db_table = 'Customers'

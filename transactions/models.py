@@ -1,5 +1,6 @@
 from django.db import models
 from django_extensions.db.fields import AutoSlugField
+from model_utils.models import TimeStampedModel, SoftDeletableModel
 
 from store.models import Item
 from accounts.models import Vendor, Customer
@@ -7,11 +8,11 @@ from accounts.models import Vendor, Customer
 DELIVERY_CHOICES = [("P", "Pending"), ("S", "Successful")]
 
 
-class Sale(models.Model):
+class Sale(SoftDeletableModel, TimeStampedModel):
     """
     Represents a sale transaction involving a customer.
     """
-
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Kullanıcı')
     date_added = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Sale Date"
@@ -109,12 +110,12 @@ class SaleDetail(models.Model):
         )
 
 
-class Purchase(models.Model):
+class Purchase(SoftDeletableModel, TimeStampedModel):
     """
     Represents a purchase of an item,
     including vendor details and delivery status.
     """
-
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Kullanıcı')
     slug = AutoSlugField(unique=True, populate_from="vendor")
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     description = models.TextField(max_length=300, blank=True, null=True)

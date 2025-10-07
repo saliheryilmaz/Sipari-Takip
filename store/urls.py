@@ -32,7 +32,7 @@ from .views import (
     LastikEnvanteriDeleteView,
     KontrolEdildiListView,
     lastik_dashboard,
-    whatsapp_gonder
+    whatsapp_gonder,
 )
 
 # URL patterns

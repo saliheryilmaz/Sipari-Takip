@@ -188,6 +188,7 @@
                     <i class="fa fa-plus fa-fw me-2"></i> Sipariş Ekle
                 </a>
             </li>
+            {% if request.user.is_superuser or request.user.profile.role == 'AD' or request.user.profile.role == 'EX' %}
             <li class="nav-item mb-2">
                 <a class="nav-link text-light {% if request.resolver_match.url_name == 'purchaseslist' %}active{% endif %}" href="{% url 'purchaseslist' %}">
                     <i class="fa fa-shopping-cart me-2"></i> Purchase Orders
@@ -208,6 +209,8 @@
                     <i class="fa-solid fa-file-invoice me-2"></i> Bills
                 </a>
             </li>
+            {% endif %}
+            {% if request.user.is_superuser or request.user.profile.role == 'AD' or request.user.profile.role == 'EX' %}
             <li class="nav-item mb-2 dropdown">
                 <a class="nav-link text-light {% if request.resolver_match.url_name == 'profile_list' or request.resolver_match.url_name == 'customer_list' or request.resolver_match.url_name == 'vendor-list' or request.resolver_match.url_name == 'user-management' %} active{% endif %} dropdown-toggle" href="#" id="accountsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fa fa-users me-2"></i> Accounts
@@ -221,6 +224,7 @@
                     <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}" href="{% url 'vendor-list' %}">Vendors</a></li>
                 </ul>
             </li>
+            {% endif %}
         </ul>
     </div>
 

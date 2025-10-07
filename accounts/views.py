@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 
+
 # Authentication and permissions
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -293,6 +294,36 @@ class CustomerDeleteView(LoginRequiredMixin, DeleteView):
     template_name = 'accounts/customer_confirm_delete.html'
     success_url = reverse_lazy('customer_list')
 
+    def post(self, request, *args, **kwargs):
+        """
+        Override post method to handle foreign key constraints.
+        """
+        self.object = self.get_object()
+        
+        # Check if customer has related records
+        from transactions.models import Sale
+        from store.models import LastikEnvanteri
+        
+        # Check for sales
+        sales_count = Sale.objects.filter(customer=self.object).count()
+        if sales_count > 0:
+            messages.error(request, f'Bu müşteri {sales_count} satış kaydına sahip. Önce satış kayıtlarını silin.')
+            return redirect('customer_list')
+        
+        # Check for lastik envanteri records
+        lastik_count = LastikEnvanteri.objects.filter(cari__icontains=self.object.first_name).count()
+        if lastik_count > 0:
+            messages.error(request, f'Bu müşteri {lastik_count} lastik envanteri kaydına sahip. Önce bu kayıtları silin.')
+            return redirect('customer_list')
+        
+        try:
+            success_url = self.get_success_url()
+            self.object.delete()  # Soft delete yapacak
+            return redirect(success_url)
+        except Exception as e:
+            messages.error(request, f'Müşteri silinirken hata oluştu: {str(e)}')
+            return redirect('customer_list')
+
 
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
@@ -337,3 +368,33 @@ class VendorDeleteView(LoginRequiredMixin, DeleteView):
     model = Vendor
     template_name = 'accounts/vendor_confirm_delete.html'
     success_url = reverse_lazy('vendor-list')
+
+    def post(self, request, *args, **kwargs):
+        """
+        Override post method to handle foreign key constraints.
+        """
+        self.object = self.get_object()
+        
+        # Check if vendor has related records
+        from transactions.models import Purchase
+        from store.models import Item
+        
+        # Check for purchases
+        purchases_count = Purchase.objects.filter(vendor=self.object).count()
+        if purchases_count > 0:
+            messages.error(request, f'Bu tedarikçi {purchases_count} alım kaydına sahip. Önce alım kayıtlarını silin.')
+            return redirect('vendor-list')
+        
+        # Check for items
+        items_count = Item.objects.filter(vendor=self.object).count()
+        if items_count > 0:
+            messages.error(request, f'Bu tedarikçi {items_count} ürün kaydına sahip. Önce ürün kayıtlarını silin.')
+            return redirect('vendor-list')
+        
+        try:
+            success_url = self.get_success_url()
+            self.object.delete()  # Soft delete yapacak
+            return redirect(success_url)
+        except Exception as e:
+            messages.error(request, f'Tedarikçi silinirken hata oluştu: {str(e)}')
+            return redirect('vendor-list')

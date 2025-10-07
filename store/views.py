@@ -58,15 +58,15 @@ def dashboard(request):
     # Kullanıcı veri izolasyonu
     current_user = request.user
     
-    # Admin ise tüm verileri göster, değilse sadece kendi verilerini
+    # Sadece Admin (AD) ve superuser tüm verileri görebilir
     if current_user.is_superuser or current_user.profile.role == 'AD':
         profiles = Profile.objects.all()
         items = Item.objects.all()
         profiles_count = profiles.count()
     else:
-        # Normal kullanıcı sadece kendi verilerini görür
+        # Yönetici (EX) ve Operatör (OP) sadece kendi verilerini görür
         profiles = Profile.objects.filter(user=current_user)
-        items = Item.objects.filter(created_by=current_user) if hasattr(Item, 'created_by') else Item.objects.none()
+        items = Item.objects.filter(user=current_user)
         profiles_count = 1  # Sadece kendisi
     
     Category.objects.annotate(nitem=Count("item"))
@@ -76,25 +76,45 @@ def dashboard(request):
     )
     items_count = items.count()
 
-    # Prepare data for charts
-    category_counts = Category.objects.annotate(
-        item_count=Count("item")
-    ).values("name", "item_count")
+    # Prepare data for charts - kullanıcı bazlı
+    if current_user.is_superuser or current_user.profile.role == 'AD':
+        category_counts = Category.objects.annotate(
+            item_count=Count("item")
+        ).values("name", "item_count")
+    else:
+        category_counts = Category.objects.filter(user=current_user).annotate(
+            item_count=Count("item")
+        ).values("name", "item_count")
+    
     categories = [cat["name"] for cat in category_counts]
     category_counts = [cat["item_count"] for cat in category_counts]
 
-    sale_dates = (
-        Sale.objects.values("date_added__date")
-        .annotate(total_sales=Sum("grand_total"))
-        .order_by("date_added__date")
-    )
+    # Satış verileri - kullanıcı bazlı (soft delete ile)
+    if current_user.is_superuser or current_user.profile.role == 'AD':
+        sale_dates = (
+            Sale.objects.filter(is_removed=False)
+            .values("date_added__date")
+            .annotate(total_sales=Sum("grand_total"))
+            .order_by("date_added__date")
+        )
+    else:
+        sale_dates = (
+            Sale.objects.filter(user=current_user, is_removed=False)
+            .values("date_added__date")
+            .annotate(total_sales=Sum("grand_total"))
+            .order_by("date_added__date")
+        )
     sale_dates_labels = [
         date["date_added__date"].strftime("%Y-%m-%d") for date in sale_dates
     ]
     sale_dates_values = [float(date["total_sales"]) for date in sale_dates]
 
-    # Lastik Envanteri verileri
-    lastik_envanteri = LastikEnvanteri.objects.all()
+    # Lastik Envanteri verileri - kullanıcı bazlı (soft delete ile)
+    if current_user.is_superuser or current_user.profile.role == 'AD':
+        lastik_envanteri = LastikEnvanteri.objects.filter(is_removed=False)
+    else:
+        lastik_envanteri = LastikEnvanteri.objects.filter(user=current_user, is_removed=False)
+    
     lastik_count = lastik_envanteri.count()
     lastik_total_value = lastik_envanteri.aggregate(Sum("toplam_fiyat"))["toplam_fiyat__sum"] or 0
     
@@ -118,10 +138,18 @@ def dashboard(request):
     lastik_odeme_prices = [float(item["total_price"] or 0) for item in lastik_odeme_counts]
     
     # Lastik satış verileri - mevsim ve araç tipine göre
-    # Doğrudan LastikEnvanteri tablosundan çek
-    tire_sales_data = LastikEnvanteri.objects.filter(
-        durum='KONTROL_EDILDI'  # Kontrol edilmiş lastikler = satışa hazır
-    )
+    # Doğrudan LastikEnvanteri tablosundan çek - kullanıcı bazlı (soft delete ile)
+    if current_user.is_superuser or current_user.profile.role == 'AD':
+        tire_sales_data = LastikEnvanteri.objects.filter(
+            is_removed=False,
+            durum='KONTROL_EDILDI'  # Kontrol edilmiş lastikler = satışa hazır
+        )
+    else:
+        tire_sales_data = LastikEnvanteri.objects.filter(
+            user=current_user,
+            is_removed=False,
+            durum='KONTROL_EDILDI'  # Kontrol edilmiş lastikler = satışa hazır
+        )
     
     # Mevsim ve grup bazında satış miktarlarını hesapla
     tire_sales_by_season_group = {}
@@ -171,7 +199,7 @@ def dashboard(request):
         "total_items": total_items,
         "vendors": Vendor.objects.all(),
         "delivery": Delivery.objects.all(),
-        "sales": Sale.objects.all(),
+        "sales": Sale.objects.filter(is_removed=False),
         "categories": categories,
         "category_counts": category_counts,
         "sale_dates_labels": sale_dates_labels,
@@ -212,6 +240,13 @@ class ProductListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
     context_object_name = "items"
     paginate_by = 10
     SingleTableView.table_pagination = False
+
+    def get_queryset(self):
+        """Filter items by current user, admin sees all."""
+        if self.request.user.is_superuser or self.request.user.profile.role == 'AD':
+            return Item.objects.all()
+        return Item.objects.filter(user=self.request.user)
+
 
 
 class ItemSearchListView(ProductListView):
@@ -269,6 +304,12 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     template_name = "store/productcreate.html"
     form_class = ItemForm
     success_url = "/products"
+
+    def get_form_kwargs(self):
+        """Pass user to form for user filtering."""
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def test_func(self):
         # item = Item.objects.get(id=pk)
@@ -441,6 +482,13 @@ class CategoryListView(LoginRequiredMixin, ListView):
     paginate_by = 10
     login_url = 'login'
 
+    def get_queryset(self):
+        """Filter categories by current user, admin sees all."""
+        if self.request.user.is_superuser or self.request.user.profile.role == 'AD':
+            return Category.objects.all()
+        return Category.objects.filter(user=self.request.user)
+
+
 
 class CategoryDetailView(LoginRequiredMixin, DetailView):
     model = Category
@@ -454,6 +502,12 @@ class CategoryCreateView(LoginRequiredMixin, CreateView):
     template_name = 'store/category_form.html'
     form_class = CategoryForm
     login_url = 'login'
+
+    def get_form_kwargs(self):
+        """Pass user to form for user filtering."""
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get_success_url(self):
         return reverse_lazy('category-detail', kwargs={'pk': self.object.pk})
@@ -519,8 +573,11 @@ class LastikEnvanteriListView(LoginRequiredMixin, ExportMixin, SingleTableView):
         from datetime import datetime, timedelta
         from django.utils import timezone
         
-        # Kontrol edildi durumundaki lastikleri hariç tut
-        queryset = LastikEnvanteri.objects.exclude(durum='KONTROL_EDILDI')
+        # Kullanıcı bazlı veri izolasyonu - admin tüm verileri görür
+        if self.request.user.is_superuser or self.request.user.profile.role == 'AD':
+            queryset = LastikEnvanteri.objects.filter(is_removed=False).exclude(durum='KONTROL_EDILDI')
+        else:
+            queryset = LastikEnvanteri.objects.filter(user=self.request.user, is_removed=False).exclude(durum='KONTROL_EDILDI')
         
         # Filtreleme
         durum = self.request.GET.get('durum')
@@ -600,11 +657,20 @@ class LastikEnvanteriCreateView(LoginRequiredMixin, CreateView):
     template_name = 'store/lastik_envanteri_form.html'
     success_url = '/lastik-envanteri'
     login_url = 'login'
+
+    def get_form_kwargs(self):
+        """Pass user to form for user filtering."""
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
     
     def form_valid(self, form):
         # Akü seçildiğinde mevsim alanını boş bırak
         if form.cleaned_data.get('grup') == 'AKU':
             form.instance.mevsim = None
+        
+        # Oluşturan kullanıcıyı ayarla
+        form.instance.user = self.request.user
         return super().form_valid(form)
     
 
@@ -654,31 +720,31 @@ def lastik_dashboard(request):
     Lastik envanteri ana sayfası
     """
     # İstatistikler - Adet sayıları
-    toplam_adet = LastikEnvanteri.objects.aggregate(
+    toplam_adet = LastikEnvanteri.objects.filter(is_removed=False).aggregate(
         toplam=Sum('adet')
     )['toplam'] or 0
     
-    stok_adet = LastikEnvanteri.objects.filter(ambar='STOK').aggregate(
+    stok_adet = LastikEnvanteri.objects.filter(is_removed=False, ambar='STOK').aggregate(
         toplam=Sum('adet')
     )['toplam'] or 0
     
-    satis_adet = LastikEnvanteri.objects.filter(ambar='SATIS').aggregate(
+    satis_adet = LastikEnvanteri.objects.filter(is_removed=False, ambar='SATIS').aggregate(
         toplam=Sum('adet')
     )['toplam'] or 0
     
-    yolda_siparis = LastikEnvanteri.objects.filter(durum='YOLDA').count()
-    islem_devam_siparis = LastikEnvanteri.objects.filter(durum='ISLEM_DEVAM_EDIYOR').count()
+    yolda_siparis = LastikEnvanteri.objects.filter(is_removed=False, durum='YOLDA').count()
+    islem_devam_siparis = LastikEnvanteri.objects.filter(is_removed=False, durum='ISLEM_DEVAM_EDIYOR').count()
     
     # Toplam değer
-    toplam_deger = LastikEnvanteri.objects.aggregate(
+    toplam_deger = LastikEnvanteri.objects.filter(is_removed=False).aggregate(
         toplam=Sum('toplam_fiyat')
     )['toplam'] or 0
     
     # Son eklenen lastikler
-    son_lastikler = LastikEnvanteri.objects.order_by('-olusturma_tarihi')[:10]
+    son_lastikler = LastikEnvanteri.objects.filter(is_removed=False).order_by('-olusturma_tarihi')[:10]
     
     # Durum dağılımı
-    durum_dagilimi = LastikEnvanteri.objects.values('durum').annotate(count=Count('id'))
+    durum_dagilimi = LastikEnvanteri.objects.filter(is_removed=False).values('durum').annotate(count=Count('id'))
     
     # Marka dağılımı - büyük harfe çevirerek grupla
     from django.db.models import Case, When, Value, CharField
@@ -783,8 +849,11 @@ class KontrolEdildiListView(LoginRequiredMixin, ExportMixin, SingleTableView):
         from datetime import datetime, timedelta
         from django.utils import timezone
         
-        # Sadece kontrol edildi durumundaki lastikleri al
-        queryset = LastikEnvanteri.objects.filter(durum='KONTROL_EDILDI')
+        # Kullanıcı bazlı veri izolasyonu - admin tüm verileri görür
+        if self.request.user.is_superuser or self.request.user.profile.role == 'AD':
+            queryset = LastikEnvanteri.objects.filter(is_removed=False, durum='KONTROL_EDILDI')
+        else:
+            queryset = LastikEnvanteri.objects.filter(user=self.request.user, is_removed=False, durum='KONTROL_EDILDI')
         
         # Filtreleme
         cari = self.request.GET.get('cari')
@@ -849,8 +918,8 @@ class KontrolEdildiListView(LoginRequiredMixin, ExportMixin, SingleTableView):
         
         context = super().get_context_data(**kwargs)
         
-        # Marka dağılımı - KONTROL_EDILDI durumundaki lastikler için
-        marka_dagilimi = LastikEnvanteri.objects.filter(durum='KONTROL_EDILDI').values('marka').annotate(
+        # Marka dağılımı - KONTROL_EDILDI durumundaki lastikler için (soft delete ile)
+        marka_dagilimi = LastikEnvanteri.objects.filter(is_removed=False, durum='KONTROL_EDILDI').values('marka').annotate(
             toplam_adet=Sum('adet')
         ).order_by('-toplam_adet')
         
@@ -861,15 +930,16 @@ class KontrolEdildiListView(LoginRequiredMixin, ExportMixin, SingleTableView):
         
         context['marka_dagilimi'] = marka_dagilimi
         
-        # Ödeme durum dağılımı - KONTROL_EDILDI durumundaki lastikler için
-        odeme_dagilimi = LastikEnvanteri.objects.filter(durum='KONTROL_EDILDI').values('odeme').annotate(
+        # Ödeme durum dağılımı - KONTROL_EDILDI durumundaki lastikler için (soft delete ile)
+        odeme_dagilimi = LastikEnvanteri.objects.filter(is_removed=False, durum='KONTROL_EDILDI').values('odeme').annotate(
             toplam_adet=Sum('adet')
         ).order_by('-toplam_adet')
         
         context['odeme_dagilimi'] = odeme_dagilimi
         
-        # Lastik satış analizi - KONTROL_EDILDI durumundaki lastikler için
+        # Lastik satış analizi - KONTROL_EDILDI durumundaki lastikler için (soft delete ile)
         tire_sales_data = LastikEnvanteri.objects.filter(
+            is_removed=False,
             durum='KONTROL_EDILDI'  # Kontrol edilmiş lastikler
         )
         tire_sales_by_season_group = {}

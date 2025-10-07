@@ -1,5 +1,6 @@
 from django import forms
 from .models import Item, Category, Delivery, LastikEnvanteri
+from accounts.models import Vendor
 
 
 class ItemForm(forms.ModelForm):
@@ -17,6 +18,24 @@ class ItemForm(forms.ModelForm):
             'expiring_date',
             'vendor'
         ]
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        # Kullanıcı bazlı filtreleme
+        if self.user:
+            self.fields['category'].queryset = Category.objects.filter(user=self.user)
+            self.fields['vendor'].queryset = Vendor.objects.filter(user=self.user)
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if self.user:
+            instance.user = self.user
+        if commit:
+            instance.save()
+        return instance
+
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(
@@ -60,6 +79,19 @@ class CategoryForm(forms.ModelForm):
         labels = {
             'name': 'Category Name',
         }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if self.user:
+            instance.user = self.user
+        if commit:
+            instance.save()
+        return instance
+
 
 
 class DeliveryForm(forms.ModelForm):
@@ -161,3 +193,24 @@ class LastikEnvanteriForm(forms.ModelForm):
                 'class': 'form-check-input'
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        # Operatörler sadece temel alanları görebilir
+        if self.user and self.user.profile.role == 'OP':
+            # Operatörler için sadece temel alanları göster
+            allowed_fields = ['cari', 'urun', 'marka', 'grup', 'mevsim', 'adet', 'birim_fiyat', 'ambar', 'aciklama1']
+            for field_name in self.fields:
+                if field_name not in allowed_fields:
+                    self.fields[field_name].widget = forms.HiddenInput()
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if self.user:
+            instance.user = self.user
+        if commit:
+            instance.save()
+        return instance
+
