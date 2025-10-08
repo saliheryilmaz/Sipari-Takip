@@ -58,6 +58,20 @@ def dashboard(request):
     # Kullanıcı veri izolasyonu
     current_user = request.user
     
+    # Yıl filtresi - URL'den al veya mevcut yılı kullan
+    selected_year = request.GET.get('year')
+    if not selected_year:
+        from datetime import datetime
+        selected_year = datetime.now().year
+    else:
+        selected_year = int(selected_year)
+    
+    # Yıl aralığı oluştur - timezone aware
+    from datetime import datetime
+    from django.utils import timezone
+    start_date = timezone.make_aware(datetime(selected_year, 1, 1))
+    end_date = timezone.make_aware(datetime(selected_year, 12, 31, 23, 59, 59))
+    
     # Sadece Admin (AD) ve superuser tüm verileri görebilir
     if current_user.is_superuser or current_user.profile.role == 'AD':
         profiles = Profile.objects.all()
@@ -89,17 +103,26 @@ def dashboard(request):
     categories = [cat["name"] for cat in category_counts]
     category_counts = [cat["item_count"] for cat in category_counts]
 
-    # Satış verileri - kullanıcı bazlı (soft delete ile)
+    # Satış verileri - kullanıcı bazlı (soft delete ile) + yıl filtresi
     if current_user.is_superuser or current_user.profile.role == 'AD':
         sale_dates = (
-            Sale.objects.filter(is_removed=False)
+            Sale.objects.filter(
+                is_removed=False,
+                date_added__date__gte=start_date.date(),
+                date_added__date__lte=end_date.date()
+            )
             .values("date_added__date")
             .annotate(total_sales=Sum("grand_total"))
             .order_by("date_added__date")
         )
     else:
         sale_dates = (
-            Sale.objects.filter(user=current_user, is_removed=False)
+            Sale.objects.filter(
+                user=current_user, 
+                is_removed=False,
+                date_added__date__gte=start_date.date(),
+                date_added__date__lte=end_date.date()
+            )
             .values("date_added__date")
             .annotate(total_sales=Sum("grand_total"))
             .order_by("date_added__date")
@@ -109,11 +132,20 @@ def dashboard(request):
     ]
     sale_dates_values = [float(date["total_sales"]) for date in sale_dates]
 
-    # Lastik Envanteri verileri - kullanıcı bazlı (soft delete ile)
+    # Lastik Envanteri verileri - kullanıcı bazlı (soft delete ile) + yıl filtresi
     if current_user.is_superuser or current_user.profile.role == 'AD':
-        lastik_envanteri = LastikEnvanteri.objects.filter(is_removed=False)
+        lastik_envanteri = LastikEnvanteri.objects.filter(
+            is_removed=False,
+            olusturma_tarihi__gte=start_date,
+            olusturma_tarihi__lte=end_date
+        )
     else:
-        lastik_envanteri = LastikEnvanteri.objects.filter(user=current_user, is_removed=False)
+        lastik_envanteri = LastikEnvanteri.objects.filter(
+            user=current_user, 
+            is_removed=False,
+            olusturma_tarihi__gte=start_date,
+            olusturma_tarihi__lte=end_date
+        )
     
     lastik_count = lastik_envanteri.count()
     lastik_total_value = lastik_envanteri.aggregate(Sum("toplam_fiyat"))["toplam_fiyat__sum"] or 0
@@ -138,17 +170,21 @@ def dashboard(request):
     lastik_odeme_prices = [float(item["total_price"] or 0) for item in lastik_odeme_counts]
     
     # Lastik satış verileri - mevsim ve araç tipine göre
-    # Doğrudan LastikEnvanteri tablosundan çek - kullanıcı bazlı (soft delete ile)
+    # Doğrudan LastikEnvanteri tablosundan çek - kullanıcı bazlı (soft delete ile) + yıl filtresi
     if current_user.is_superuser or current_user.profile.role == 'AD':
         tire_sales_data = LastikEnvanteri.objects.filter(
             is_removed=False,
-            durum='KONTROL_EDILDI'  # Kontrol edilmiş lastikler = satışa hazır
+            durum='KONTROL_EDILDI',  # Kontrol edilmiş lastikler = satışa hazır
+            olusturma_tarihi__gte=start_date,
+            olusturma_tarihi__lte=end_date
         )
     else:
         tire_sales_data = LastikEnvanteri.objects.filter(
             user=current_user,
             is_removed=False,
-            durum='KONTROL_EDILDI'  # Kontrol edilmiş lastikler = satışa hazır
+            durum='KONTROL_EDILDI',  # Kontrol edilmiş lastikler = satışa hazır
+            olusturma_tarihi__gte=start_date,
+            olusturma_tarihi__lte=end_date
         )
     
     # Mevsim ve grup bazında satış miktarlarını hesapla
@@ -189,8 +225,45 @@ def dashboard(request):
     # Basit liste formatında veri hazırla
     tire_sales_3d_data = [binek_data, ticari_data]
     
+    # Cari analizi - en çok alım yaptığımız cariler (fiyat bazında) + yıl filtresi
+    if current_user.is_superuser or current_user.profile.role == 'AD':
+        vendor_purchases = (
+            LastikEnvanteri.objects.filter(
+                is_removed=False,
+                olusturma_tarihi__gte=start_date,
+                olusturma_tarihi__lte=end_date
+            )
+            .values('cari')
+            .annotate(total_purchases=Sum('toplam_fiyat'))
+            .order_by('-total_purchases')[:10]  # En çok alım yaptığımız 10 cari
+        )
+    else:
+        vendor_purchases = (
+            LastikEnvanteri.objects.filter(
+                user=current_user, 
+                is_removed=False,
+                olusturma_tarihi__gte=start_date,
+                olusturma_tarihi__lte=end_date
+            )
+            .values('cari')
+            .annotate(total_purchases=Sum('toplam_fiyat'))
+            .order_by('-total_purchases')[:10]  # En çok alım yaptığımız 10 cari
+        )
     
+    # Cari verilerini chart için hazırla
+    vendor_names = []
+    vendor_totals = []
+    
+    for vendor in vendor_purchases:
+        vendor_name = vendor['cari'] or 'İsimsiz Cari'
+        vendor_names.append(vendor_name)
+        vendor_totals.append(float(vendor['total_purchases'] or 0))
 
+    # Mevcut yıl ve seçili yıl bilgileri
+    from datetime import datetime
+    current_year = datetime.now().year
+    available_years = list(range(current_year - 5, current_year + 2))  # Son 5 yıl + gelecek 2 yıl
+    
     context = {
         "items": items,
         "profiles": profiles,
@@ -218,6 +291,13 @@ def dashboard(request):
         "tire_sales_3d_data": tire_sales_3d_data,
         "seasons": seasons,
         "groups": groups,
+        # Cari analizi verileri
+        "vendor_names": vendor_names,
+        "vendor_totals": vendor_totals,
+        # Yıl filtresi verileri
+        "selected_year": selected_year,
+        "current_year": current_year,
+        "available_years": available_years,
     }
     return render(request, "store/dashboard.html", context)
 

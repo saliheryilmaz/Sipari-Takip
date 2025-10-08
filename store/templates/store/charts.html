@@ -28,9 +28,9 @@
     </div>
     <div class="card shadow border-0 mb-7 col-md-6 col-lg-6">
         <div class="card-body">
-            <h5 class="card-title">Sales Over Time</h5>
+            <h5 class="card-title">En Çok Alım Yaptığımız Cariler</h5>
             <div class="chart-container">
-                <canvas id="lineChart"></canvas>
+                <canvas id="customerChart"></canvas>
             </div>
         </div>
     </div>
@@ -360,42 +360,156 @@
         }
     });
 
-    // Line Chart
-    var ctxLine = document.getElementById('lineChart').getContext('2d');
-    var lineChart = new Chart(ctxLine, {
-        type: 'line',
+    // Cari Chart - En çok alım yaptığımız cariler
+    var ctxCustomer = document.getElementById('customerChart').getContext('2d');
+    var customerChart = new Chart(ctxCustomer, {
+        type: 'bar',
         data: {
-            labels: {{ sale_dates_labels|safe }},
+            labels: {{ vendor_names|safe }},
             datasets: [{
-                label: 'Sales Over Time',
-                data: {{ sale_dates_values|safe }},
-                fill: false,
-                borderColor: '#4BC0C0',
-                tension: 0.1
+                label: 'Toplam Alım (₺)',
+                data: {{ vendor_totals|safe }},
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(153, 102, 255, 0.8)',
+                    'rgba(255, 159, 64, 0.8)',
+                    'rgba(199, 199, 199, 0.8)',
+                    'rgba(83, 102, 255, 0.8)',
+                    'rgba(255, 99, 255, 0.8)',
+                    'rgba(255, 205, 86, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(83, 102, 255, 1)',
+                    'rgba(255, 99, 255, 1)',
+                    'rgba(255, 205, 86, 1)'
+                ],
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     position: 'top',
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            return 'Sales: ' + tooltipItem.raw;
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: 14,
+                            weight: 'bold'
                         }
                     }
                 },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            return 'Cari: ' + tooltipItems[0].label;
+                        },
+                        label: function(tooltipItem) {
+                            return 'Toplam Alım: ₺' + tooltipItem.raw.toLocaleString('tr-TR', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                        }
+                    },
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 2,
+                    cornerRadius: 10,
+                    displayColors: true
+                },
                 title: {
                     display: true,
-                    text: 'Sales Over Time',
+                    text: 'En Çok Alım Yaptığımız Cariler - Fiyat Bazında',
                     font: {
-                        size: 16
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    color: '#2c3e50',
+                    padding: 20
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Cariler',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        color: '#2c3e50'
+                    },
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#2c3e50',
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Toplam Alım (₺)',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        color: '#2c3e50'
+                    },
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#2c3e50',
+                        callback: function(value) {
+                            return '₺' + value.toLocaleString('tr-TR');
+                        }
                     }
                 }
             },
-            maintainAspectRatio: false
+            animation: {
+                duration: 1500,
+                easing: 'easeInOutQuart',
+                delay: function(context) {
+                    return context.dataIndex * 100;
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            elements: {
+                bar: {
+                    borderWidth: 3,
+                    hoverBorderWidth: 5
+                }
+            }
         }
     });
   </script>
@@ -407,7 +521,7 @@
     height: 400px;
   }
 
-  #lastikDurumChart, #lastikMarkaChart, #odemeDurumChart, #lineChart {
+  #lastikDurumChart, #lastikMarkaChart, #odemeDurumChart, #customerChart {
     max-width: 100%;
     height: 100%;
   }

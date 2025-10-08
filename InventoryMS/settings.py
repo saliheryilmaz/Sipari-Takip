@@ -9,10 +9,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-g_n2+2bznu6e@1wel!i(&-4tp86_7lop5395ww+i4x%9*7^old')
+SECRET_KEY = os.environ.get('SECRET_KEY', '7f_q=+0x_*ezze_syaf+3*@p9!v(cx7ali7*t4%u(0uit*^ino')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'  # Geçici olarak True
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 # Railway PORT ayarı
 PORT = os.environ.get('PORT', 8000)
@@ -30,9 +30,9 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.vercel.app',
 ]
 
-# CSRF Cookie ayarları
-CSRF_COOKIE_SECURE = False  # HTTP için geçici olarak False
-CSRF_COOKIE_HTTPONLY = False  # JavaScript erişimi için
+# CSRF Cookie ayarları - Geliştirme modu için
+CSRF_COOKIE_SECURE = False  # HTTP için False
+CSRF_COOKIE_HTTPONLY = False  # Geliştirme için False
 CSRF_COOKIE_SAMESITE = 'Lax'  # Cross-site istekler için
 
 
@@ -173,22 +173,46 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# Production Security Settings - Geçici olarak kapatıldı
-# if not DEBUG:
-#     # HTTPS ayarları
-#     SECURE_SSL_REDIRECT = True
-#     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-#     SECURE_HSTS_SECONDS = 31536000
-#     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-#     SECURE_HSTS_PRELOAD = True
-#     
-#     # Güvenlik başlıkları
-#     SECURE_CONTENT_TYPE_NOSNIFF = True
-#     SECURE_BROWSER_XSS_FILTER = True
-#     X_FRAME_OPTIONS = 'DENY'
-#     
-#     # Session güvenliği
-#     SESSION_COOKIE_SECURE = True
-#     CSRF_COOKIE_SECURE = True
-#     SESSION_COOKIE_HTTPONLY = True
-#     CSRF_COOKIE_HTTPONLY = True
+# Geliştirme modu ayarları
+if DEBUG:
+    # HTTP için güvenlik ayarlarını devre dışı bırak
+    SECURE_SSL_REDIRECT = False
+    SECURE_PROXY_SSL_HEADER = None
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    
+    # Güvenlik başlıkları
+    SECURE_CONTENT_TYPE_NOSNIFF = False
+    SECURE_BROWSER_XSS_FILTER = False
+    X_FRAME_OPTIONS = 'SAMEORIGIN'
+    
+    # Session güvenliği
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_HTTPONLY = False
+    
+    # CSRF güvenliği
+    CSRF_COOKIE_SECURE = False
+    CSRF_COOKIE_HTTPONLY = False
+
+# Production Security Settings
+if not DEBUG:
+    # HTTPS ayarları
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # Güvenlik başlıkları
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
+    
+    # Session güvenliği
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    
+    # CSRF güvenliği
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True

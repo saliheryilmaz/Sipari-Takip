@@ -119,6 +119,7 @@
                                         <th>Birim Fiyat</th>
                                         <th>Toplam Fiyat</th>
                                         <th>Ambar</th>
+                                        <th>Açıklama</th>
                                         <th>Ödeme</th>
                                         <th>Oluşturma Tarihi</th>
                                         <th>İşlemler</th>
@@ -136,6 +137,7 @@
                                         <td>{{ lastik.birim_fiyat|turkish_currency }}</td>
                                         <td>{{ lastik.toplam_fiyat|turkish_currency }}</td>
                                         <td>{{ lastik.get_ambar_display }}</td>
+                                        <td>{{ lastik.aciklama1|default:"-" }}</td>
                                         <td>{{ lastik.get_odeme_display|default:"-" }}</td>
                                         <td>{{ lastik.olusturma_tarihi|date:"d.m.Y H:i" }}</td>
                                         <td>
@@ -146,7 +148,7 @@
                                                 <a href="{% url 'lastik-envanteri-update' lastik.pk %}" class="btn btn-sm btn-warning">
                                                     Düzenle
                                                 </a>
-                                                <button onclick="whatsappGonder({{ lastik.pk }})" class="btn btn-sm btn-success">
+                                                <button data-lastik-id="{{ lastik.pk }}" class="btn btn-sm btn-success whatsapp-btn">
                                                     WhatsApp
                                                 </button>
                                                 <a href="{% url 'lastik-envanteri-delete' lastik.pk %}" class="btn btn-sm btn-danger" onclick="return confirm('Bu lastiği silmek istediğinizden emin misiniz?')">
@@ -166,10 +168,10 @@
                             <ul class="pagination justify-content-center">
                                 {% if page_obj.has_previous %}
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=1{% if request.GET.cari %}&cari={{ request.GET.cari }}{% endif %}{% if request.GET.marka %}&marka={{ request.GET.marka }}{% endif %}{% if request.GET.grup %}&grup={{ request.GET.grup }}{% endif %}{% if request.GET.mevsim %}&mevsim={{ request.GET.mevsim }}{% endif %}{% if request.GET.ambar %}&ambar={{ request.GET.ambar }}{% endif %}{% if request.GET.tarih_filtresi %}&tarih_filtresi={{ request.GET.tarih_filtresi }}{% endif %}{% if request.GET.baslangic_tarihi %}&baslangic_tarihi={{ request.GET.baslangic_tarihi }}{% endif %}{% if request.GET.bitis_tarihi %}&bitis_tarihi={{ request.GET.bitis_tarihi }}{% endif %}">&laquo; İlk</a>
+                                        <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page=1">&laquo; İlk</a>
                                     </li>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.cari %}&cari={{ request.GET.cari }}{% endif %}{% if request.GET.marka %}&marka={{ request.GET.marka }}{% endif %}{% if request.GET.grup %}&grup={{ request.GET.grup }}{% endif %}{% if request.GET.mevsim %}&mevsim={{ request.GET.mevsim }}{% endif %}{% if request.GET.ambar %}&ambar={{ request.GET.ambar }}{% endif %}{% if request.GET.tarih_filtresi %}&tarih_filtresi={{ request.GET.tarih_filtresi }}{% endif %}{% if request.GET.baslangic_tarihi %}&baslangic_tarihi={{ request.GET.baslangic_tarihi }}{% endif %}{% if request.GET.bitis_tarihi %}&bitis_tarihi={{ request.GET.bitis_tarihi }}{% endif %}">Önceki</a>
+                                        <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">Önceki</a>
                                     </li>
                                 {% endif %}
 
@@ -181,10 +183,10 @@
 
                                 {% if page_obj.has_next %}
                                     <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.cari %}&cari={{ request.GET.cari }}{% endif %}{% if request.GET.marka %}&marka={{ request.GET.marka }}{% endif %}{% if request.GET.grup %}&grup={{ request.GET.grup }}{% endif %}{% if request.GET.mevsim %}&mevsim={{ request.GET.mevsim }}{% endif %}{% if request.GET.ambar %}&ambar={{ request.GET.ambar }}{% endif %}{% if request.GET.tarih_filtresi %}&tarih_filtresi={{ request.GET.tarih_filtresi }}{% endif %}{% if request.GET.baslangic_tarihi %}&baslangic_tarihi={{ request.GET.baslangic_tarihi }}{% endif %}{% if request.GET.bitis_tarihi %}&bitis_tarihi={{ request.GET.bitis_tarihi }}{% endif %}">Sonraki</a>
+                                        <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">Sonraki</a>
                                     </li>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.cari %}&cari={{ request.GET.cari }}{% endif %}{% if request.GET.marka %}&marka={{ request.GET.marka }}{% endif %}{% if request.GET.grup %}&grup={{ request.GET.grup }}{% endif %}{% if request.GET.mevsim %}&mevsim={{ request.GET.mevsim }}{% endif %}{% if request.GET.ambar %}&ambar={{ request.GET.ambar }}{% endif %}{% if request.GET.tarih_filtresi %}&tarih_filtresi={{ request.GET.tarih_filtresi }}{% endif %}{% if request.GET.baslangic_tarihi %}&baslangic_tarihi={{ request.GET.baslangic_tarihi }}{% endif %}{% if request.GET.bitis_tarihi %}&bitis_tarihi={{ request.GET.bitis_tarihi }}{% endif %}">Son &raquo;</a>
+                                        <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.paginator.num_pages }}">Son &raquo;</a>
                                     </li>
                                 {% endif %}
                             </ul>
@@ -229,6 +231,17 @@ function whatsappGonder(lastikId) {
         alert('Bir hata oluştu');
     });
 }
+
+// Event listener for WhatsApp buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const whatsappButtons = document.querySelectorAll('.whatsapp-btn');
+    whatsappButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const lastikId = this.getAttribute('data-lastik-id');
+            whatsappGonder(lastikId);
+        });
+    });
+});
 
 function toggleCustomDate() {
     const tarihFiltresi = document.getElementById('tarih_filtresi');
