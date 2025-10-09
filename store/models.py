@@ -136,6 +136,7 @@ class LastikEnvanteri(SoftDeletableModel, TimeStampedModel):
         ('ISLEM_DEVAM_EDIYOR', 'İşlem Devam Ediyor'),
         ('TESLIM_EDILDI', 'Teslim Edildi'),
         ('KONTROL_EDILDI', 'Kontrol Edildi'),
+        ('IPTAL_EDILDI', 'İptal Edildi'),
     ]
     
     
@@ -148,6 +149,7 @@ class LastikEnvanteri(SoftDeletableModel, TimeStampedModel):
     ODEME_CHOICES = [
         ('KART', 'Kredi Kartı'),
         ('HAVALE', 'Havale'),
+        ('CARI_HESAP', 'Cari Hesap'),
     ]
     
     GRUP_CHOICES = [
@@ -177,6 +179,7 @@ class LastikEnvanteri(SoftDeletableModel, TimeStampedModel):
     odeme = models.CharField(max_length=20, choices=ODEME_CHOICES, blank=True, null=True, verbose_name='Ödeme')
     sms_gonderildi = models.BooleanField(default=False, verbose_name='SMS Gönderildi')
     one_cikar = models.BooleanField(default=False, verbose_name='Öne Çıkar')
+    iptal_sebebi = models.TextField(blank=True, null=True, verbose_name='İptal Sebebi')
     
     # Kullanıcı alanı - veri izolasyonu için
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Kullanıcı')

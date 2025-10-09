@@ -132,20 +132,20 @@ def dashboard(request):
     ]
     sale_dates_values = [float(date["total_sales"]) for date in sale_dates]
 
-    # Lastik Envanteri verileri - kullanıcı bazlı (soft delete ile) + yıl filtresi
+    # Lastik Envanteri verileri - kullanıcı bazlı (soft delete ile) + yıl filtresi + iptal edilenleri hariç tut
     if current_user.is_superuser or current_user.profile.role == 'AD':
         lastik_envanteri = LastikEnvanteri.objects.filter(
             is_removed=False,
             olusturma_tarihi__gte=start_date,
             olusturma_tarihi__lte=end_date
-        )
+        ).exclude(durum='IPTAL_EDILDI')
     else:
         lastik_envanteri = LastikEnvanteri.objects.filter(
             user=current_user, 
             is_removed=False,
             olusturma_tarihi__gte=start_date,
             olusturma_tarihi__lte=end_date
-        )
+        ).exclude(durum='IPTAL_EDILDI')
     
     lastik_count = lastik_envanteri.count()
     lastik_total_value = lastik_envanteri.aggregate(Sum("toplam_fiyat"))["toplam_fiyat__sum"] or 0
@@ -170,14 +170,14 @@ def dashboard(request):
     lastik_odeme_prices = [float(item["total_price"] or 0) for item in lastik_odeme_counts]
     
     # Lastik satış verileri - mevsim ve araç tipine göre
-    # Doğrudan LastikEnvanteri tablosundan çek - kullanıcı bazlı (soft delete ile) + yıl filtresi
+    # Doğrudan LastikEnvanteri tablosundan çek - kullanıcı bazlı (soft delete ile) + yıl filtresi + iptal edilenleri hariç tut
     if current_user.is_superuser or current_user.profile.role == 'AD':
         tire_sales_data = LastikEnvanteri.objects.filter(
             is_removed=False,
             durum='KONTROL_EDILDI',  # Kontrol edilmiş lastikler = satışa hazır
             olusturma_tarihi__gte=start_date,
             olusturma_tarihi__lte=end_date
-        )
+        ).exclude(durum='IPTAL_EDILDI')
     else:
         tire_sales_data = LastikEnvanteri.objects.filter(
             user=current_user,
@@ -185,7 +185,7 @@ def dashboard(request):
             durum='KONTROL_EDILDI',  # Kontrol edilmiş lastikler = satışa hazır
             olusturma_tarihi__gte=start_date,
             olusturma_tarihi__lte=end_date
-        )
+        ).exclude(durum='IPTAL_EDILDI')
     
     # Mevsim ve grup bazında satış miktarlarını hesapla
     tire_sales_by_season_group = {}
@@ -225,7 +225,7 @@ def dashboard(request):
     # Basit liste formatında veri hazırla
     tire_sales_3d_data = [binek_data, ticari_data]
     
-    # Cari analizi - en çok alım yaptığımız cariler (fiyat bazında) + yıl filtresi
+    # Cari analizi - en çok alım yaptığımız cariler (fiyat bazında) + yıl filtresi + iptal edilenleri hariç tut
     if current_user.is_superuser or current_user.profile.role == 'AD':
         vendor_purchases = (
             LastikEnvanteri.objects.filter(
@@ -233,6 +233,7 @@ def dashboard(request):
                 olusturma_tarihi__gte=start_date,
                 olusturma_tarihi__lte=end_date
             )
+            .exclude(durum='IPTAL_EDILDI')
             .values('cari')
             .annotate(total_purchases=Sum('toplam_fiyat'))
             .order_by('-total_purchases')[:10]  # En çok alım yaptığımız 10 cari
@@ -245,6 +246,7 @@ def dashboard(request):
                 olusturma_tarihi__gte=start_date,
                 olusturma_tarihi__lte=end_date
             )
+            .exclude(durum='IPTAL_EDILDI')
             .values('cari')
             .annotate(total_purchases=Sum('toplam_fiyat'))
             .order_by('-total_purchases')[:10]  # En çok alım yaptığımız 10 cari
@@ -655,9 +657,9 @@ class LastikEnvanteriListView(LoginRequiredMixin, ExportMixin, SingleTableView):
         
         # Kullanıcı bazlı veri izolasyonu - admin tüm verileri görür
         if self.request.user.is_superuser or self.request.user.profile.role == 'AD':
-            queryset = LastikEnvanteri.objects.filter(is_removed=False).exclude(durum='KONTROL_EDILDI')
+            queryset = LastikEnvanteri.objects.filter(is_removed=False).exclude(durum='KONTROL_EDILDI').exclude(durum='IPTAL_EDILDI')
         else:
-            queryset = LastikEnvanteri.objects.filter(user=self.request.user, is_removed=False).exclude(durum='KONTROL_EDILDI')
+            queryset = LastikEnvanteri.objects.filter(user=self.request.user, is_removed=False).exclude(durum='KONTROL_EDILDI').exclude(durum='IPTAL_EDILDI')
         
         # Filtreleme
         durum = self.request.GET.get('durum')
@@ -799,32 +801,32 @@ def lastik_dashboard(request):
     """
     Lastik envanteri ana sayfası
     """
-    # İstatistikler - Adet sayıları
-    toplam_adet = LastikEnvanteri.objects.filter(is_removed=False).aggregate(
+    # İstatistikler - Adet sayıları (iptal edilenleri hariç tut)
+    toplam_adet = LastikEnvanteri.objects.filter(is_removed=False).exclude(durum='IPTAL_EDILDI').aggregate(
         toplam=Sum('adet')
     )['toplam'] or 0
     
-    stok_adet = LastikEnvanteri.objects.filter(is_removed=False, ambar='STOK').aggregate(
+    stok_adet = LastikEnvanteri.objects.filter(is_removed=False, ambar='STOK').exclude(durum='IPTAL_EDILDI').aggregate(
         toplam=Sum('adet')
     )['toplam'] or 0
     
-    satis_adet = LastikEnvanteri.objects.filter(is_removed=False, ambar='SATIS').aggregate(
+    satis_adet = LastikEnvanteri.objects.filter(is_removed=False, ambar='SATIS').exclude(durum='IPTAL_EDILDI').aggregate(
         toplam=Sum('adet')
     )['toplam'] or 0
     
     yolda_siparis = LastikEnvanteri.objects.filter(is_removed=False, durum='YOLDA').count()
     islem_devam_siparis = LastikEnvanteri.objects.filter(is_removed=False, durum='ISLEM_DEVAM_EDIYOR').count()
     
-    # Toplam değer
-    toplam_deger = LastikEnvanteri.objects.filter(is_removed=False).aggregate(
+    # Toplam değer (iptal edilenleri hariç tut)
+    toplam_deger = LastikEnvanteri.objects.filter(is_removed=False).exclude(durum='IPTAL_EDILDI').aggregate(
         toplam=Sum('toplam_fiyat')
     )['toplam'] or 0
     
-    # Son eklenen lastikler
-    son_lastikler = LastikEnvanteri.objects.filter(is_removed=False).order_by('-olusturma_tarihi')[:10]
+    # Son eklenen lastikler (iptal edilenleri hariç tut)
+    son_lastikler = LastikEnvanteri.objects.filter(is_removed=False).exclude(durum='IPTAL_EDILDI').order_by('-olusturma_tarihi')[:10]
     
-    # Durum dağılımı
-    durum_dagilimi = LastikEnvanteri.objects.filter(is_removed=False).values('durum').annotate(count=Count('id'))
+    # Durum dağılımı (iptal edilenleri hariç tut)
+    durum_dagilimi = LastikEnvanteri.objects.filter(is_removed=False).exclude(durum='IPTAL_EDILDI').values('durum').annotate(count=Count('id'))
     
     # Marka dağılımı - büyük harfe çevirerek grupla
     from django.db.models import Case, When, Value, CharField
@@ -1050,4 +1052,99 @@ class KontrolEdildiListView(LoginRequiredMixin, ExportMixin, SingleTableView):
         context['seasons'] = seasons
         context['tire_sales_3d_data'] = tire_sales_3d_data
         
+        return context
+
+
+# İptal işlemi için view'lar
+class LastikEnvanteriCancelFormView(LoginRequiredMixin, DetailView):
+    """
+    İptal sebebi formu görünümü
+    """
+    model = LastikEnvanteri
+    template_name = 'store/lastik_envanteri_cancel.html'
+    context_object_name = 'object'
+    
+    def get_queryset(self):
+        """
+        Kullanıcı kontrolü ile queryset
+        """
+        current_user = self.request.user
+        if current_user.is_superuser or current_user.profile.role == 'AD':
+            return LastikEnvanteri.objects.filter(is_removed=False)
+        else:
+            return LastikEnvanteri.objects.filter(user=current_user, is_removed=False)
+    
+    def get(self, request, *args, **kwargs):
+        """
+        GET isteğini işle
+        """
+        return super().get(request, *args, **kwargs)
+
+
+@login_required
+def lastik_envanteri_cancel(request, pk):
+    """
+    Lastik envanteri kaydını iptal et - POST ile sebep al
+    """
+    if request.method == 'POST':
+        try:
+            lastik = LastikEnvanteri.objects.get(pk=pk, is_removed=False)
+            
+            # Kullanıcı kontrolü
+            if not request.user.is_superuser and request.user.profile.role != 'AD':
+                if lastik.user != request.user:
+                    return JsonResponse({'success': False, 'message': 'Bu kaydı iptal etme yetkiniz yok.'})
+            
+            # İptal sebebini al
+            iptal_sebebi = request.POST.get('iptal_sebebi', '').strip()
+            
+            if not iptal_sebebi or len(iptal_sebebi) < 3:
+                return JsonResponse({'success': False, 'message': 'İptal sebebi en az 3 karakter olmalıdır.'})
+            
+            # Durumu iptal edildi olarak değiştir ve sebebi kaydet
+            lastik.durum = 'IPTAL_EDILDI'
+            lastik.iptal_sebebi = iptal_sebebi
+            lastik.save()
+            
+            # İptal edilen lastikler sayfasına yönlendir
+            from django.http import HttpResponseRedirect
+            from django.urls import reverse
+            return HttpResponseRedirect(reverse('iptal-edilen-lastikler-list'))
+            
+        except LastikEnvanteri.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Kayıt bulunamadı.'})
+    
+    return JsonResponse({'success': False, 'message': 'Geçersiz istek.'})
+
+
+class IptalEdilenLastiklerListView(LoginRequiredMixin, ListView):
+    """
+    İptal edilen lastiklerin listesi
+    """
+    model = LastikEnvanteri
+    template_name = 'store/iptal_edilen_lastikler.html'
+    context_object_name = 'lastikler'
+    paginate_by = 20
+    
+    def get_queryset(self):
+        """
+        İptal edilen lastikleri getir
+        """
+        current_user = self.request.user
+        
+        if current_user.is_superuser or current_user.profile.role == 'AD':
+            return LastikEnvanteri.objects.filter(
+                is_removed=False,
+                durum='IPTAL_EDILDI'
+            ).order_by('-olusturma_tarihi')
+        else:
+            return LastikEnvanteri.objects.filter(
+                user=current_user,
+                is_removed=False,
+                durum='IPTAL_EDILDI'
+            ).order_by('-olusturma_tarihi')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'İptal Edilen Lastikler'
         return context

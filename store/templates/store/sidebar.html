@@ -15,6 +15,8 @@
         display: flex;
         flex-direction: column;
         transition: left 0.3s ease;
+        height: 100vh; /* Full viewport height */
+        overflow: hidden; /* Prevent body scroll */
     }
 
 
@@ -25,12 +27,34 @@
 
     .sidebar-header {
         background-color: #212529;
+        flex-shrink: 0; /* Prevent header from shrinking */
     }
 
     .nav-container {
         flex: 1; /* Take up remaining space */
         overflow-y: auto; /* Enable vertical scrolling */
         padding: 5px; /* Add some padding */
+        max-height: calc(100vh - 200px); /* Ensure space for header and footer */
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: #6c757d #343a40; /* Firefox */
+    }
+    
+    /* Custom scrollbar for Webkit browsers */
+    .nav-container::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .nav-container::-webkit-scrollbar-track {
+        background: #343a40;
+    }
+    
+    .nav-container::-webkit-scrollbar-thumb {
+        background: #6c757d;
+        border-radius: 3px;
+    }
+    
+    .nav-container::-webkit-scrollbar-thumb:hover {
+        background: #adb5bd;
     }
 
     .nav-link {
@@ -69,6 +93,10 @@
         background-color: #212529;
         text-align: center;
         padding: 10px;
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        flex-shrink: 0; /* Prevent footer from shrinking */
     }
 
     /* Mobile responsive styles */
@@ -165,7 +193,7 @@
         <ul class="nav flex-column mt-3">
             <li class="nav-item mb-2">
                 <a class="nav-link text-light {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
-                    <i class="fa fa-tachometer-alt fa-fw me-2"></i> Yönetici Ekranı
+                    <i class="fa fa-tachometer-alt fa-fw me-2"></i>  Yönetici Ekranı
                 </a>
             </li>
             <li class="nav-item mb-2">
@@ -181,6 +209,11 @@
             <li class="nav-item mb-2">
                 <a class="nav-link text-light {% if request.resolver_match.url_name == 'kontrol-edildi-list' %}active{% endif %}" href="{% url 'kontrol-edildi-list' %}">
                     <i class="fa fa-check-circle fa-fw me-2"></i> Kontrol Edilen 
+                </a>
+            </li>
+            <li class="nav-item mb-2">
+                <a class="nav-link text-light {% if request.resolver_match.url_name == 'iptal-edilen-lastikler-list' %}active{% endif %}" href="{% url 'iptal-edilen-lastikler-list' %}">
+                    <i class="fa fa-times-circle fa-fw me-2"></i> İptal Edilen Lastikler
                 </a>
             </li>
             <li class="nav-item mb-2">
@@ -229,7 +262,7 @@
     </div>
 
     <!-- Sidebar Footer -->
-    <div class="sidebar-footer position-absolute bottom-0 w-100 text-center py-3 bg-dark border-top border-secondary">
+    <div class="sidebar-footer">
         <form method="post" action="{% url 'user-logout' %}" class="d-inline">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger btn-sm w-75">

@@ -1,7 +1,7 @@
 {% extends 'store/base.html' %}
 {% load static %}
 
-{% block title %}Lastik Envanteri Sil{% endblock %}
+{% block title %}Lastik Envanteri İptal Et{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -13,10 +13,10 @@
                         <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Ana Sayfa</a></li>
                         <li class="breadcrumb-item"><a href="{% url 'lastik-dashboard' %}">Lastik Dashboard</a></li>
                         <li class="breadcrumb-item"><a href="{% url 'lastik-envanteri-list' %}">Lastik Envanteri</a></li>
-                        <li class="breadcrumb-item active">Sil</li>
+                        <li class="breadcrumb-item active">İptal Et</li>
                     </ol>
                 </div>
-                <h4 class="page-title">Lastik Envanteri Sil</h4>
+                <h4 class="page-title">Lastik Envanteri İptal Et</h4>
             </div>
         </div>
     </div>
@@ -25,17 +25,17 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title text-danger">Lastik Envanteri Silme Onayı</h4>
+                    <h4 class="card-title text-warning">Lastik Envanteri İptal Etme</h4>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-warning">
                         <h5 class="alert-heading">Dikkat!</h5>
-                        <p>Bu lastik envanteri kaydını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
+                        <p>Bu lastik envanteri kaydını iptal etmek istediğinizden emin misiniz? İptal sebebini belirtmeniz gerekmektedir.</p>
                     </div>
 
                     <div class="card border">
                         <div class="card-header bg-light">
-                            <h5 class="mb-0">Silinecek Kayıt Bilgileri</h5>
+                            <h5 class="mb-0">İptal Edilecek Kayıt Bilgileri</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -92,17 +92,32 @@
                     </div>
 
                     <div class="mt-4">
-                        <form method="post">
+                        <form method="post" action="{% url 'lastik-envanteri-cancel' object.pk %}" id="cancelForm">
                             {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="iptal_sebebi" class="form-label">
+                                    <strong>İptal Sebebi <span class="text-danger">*</span></strong>
+                                </label>
+                                <textarea 
+                                    class="form-control" 
+                                    id="iptal_sebebi" 
+                                    name="iptal_sebebi" 
+                                    rows="4" 
+                                    placeholder="İptal etme sebebinizi detaylı olarak yazınız..."
+                                    required
+                                ></textarea>
+                                <div class="form-text">İptal sebebi zorunludur ve en az 3 karakter olmalıdır.</div>
+                            </div>
+                            
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="mdi mdi-delete"></i> Evet, Sil
+                                <button type="submit" class="btn btn-warning" id="cancelBtn">
+                                    <i class="mdi mdi-cancel"></i> İptal Et
                                 </button>
                                 <a href="{% url 'lastik-envanteri-detail' object.pk %}" class="btn btn-secondary">
                                     <i class="mdi mdi-arrow-left"></i> Hayır, Geri Dön
                                 </a>
-                                <a href="{% url 'lastik-envanteri-cancel-form' object.pk %}" class="btn btn-warning">
-                                    <i class="mdi mdi-cancel"></i> Sipariş İptal
+                                <a href="{% url 'lastik-envanteri-list' %}" class="btn btn-outline-secondary">
+                                    <i class="mdi mdi-list"></i> Listeye Dön
                                 </a>
                             </div>
                         </form>
@@ -112,5 +127,25 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
+<script>
+document.getElementById('cancelForm').addEventListener('submit', function(e) {
+    const sebep = document.getElementById('iptal_sebebi').value.trim();
+    
+    if (sebep.length < 3) {
+        e.preventDefault();
+        alert('İptal sebebi en az 3 karakter olmalıdır.');
+        return false;
+    }
+    
+    if (!confirm('Bu lastiği iptal etmek istediğinizden emin misiniz?')) {
+        e.preventDefault();
+        return false;
+    }
+    
+    // Butonu devre dışı bırak
+    document.getElementById('cancelBtn').disabled = true;
+    document.getElementById('cancelBtn').innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> İptal Ediliyor...';
+});
+</script>
+{% endblock %}

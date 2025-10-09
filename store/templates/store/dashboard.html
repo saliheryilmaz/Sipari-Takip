@@ -18,12 +18,12 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="row align-items-center">
-                                    <div class="col-md-6">
+                                    <div class="col-md-6 col-12 mb-3 mb-md-0">
                                         <h5 class="card-title mb-0">Dashboard - {{ selected_year }} Yılı</h5>
                                         <p class="text-muted mb-0">Tüm chartlar seçili yıla göre filtrelenmiştir</p>
                                     </div>
-                                    <div class="col-md-6">
-                                        <form method="get" class="d-flex justify-content-end">
+                                    <div class="col-md-6 col-12">
+                                        <form method="get" class="d-flex justify-content-md-end justify-content-start">
                                             <div class="input-group" style="max-width: 200px;">
                                                 <select name="year" class="form-select" onchange="this.form.submit()">
                                                     {% for year in available_years %}

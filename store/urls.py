@@ -30,9 +30,12 @@ from .views import (
     LastikEnvanteriCreateView,
     LastikEnvanteriUpdateView,
     LastikEnvanteriDeleteView,
+    LastikEnvanteriCancelFormView,
     KontrolEdildiListView,
+    IptalEdilenLastiklerListView,
     lastik_dashboard,
     whatsapp_gonder,
+    lastik_envanteri_cancel,
 )
 
 # URL patterns
@@ -183,6 +186,21 @@ urlpatterns = [
         'kontrol-edildi/',
         KontrolEdildiListView.as_view(),
         name='kontrol-edildi-list'
+    ),
+    path(
+        'iptal-edilen-lastikler/',
+        IptalEdilenLastiklerListView.as_view(),
+        name='iptal-edilen-lastikler-list'
+    ),
+    path(
+        'lastik-envanteri/<int:pk>/cancel-form/',
+        LastikEnvanteriCancelFormView.as_view(),
+        name='lastik-envanteri-cancel-form'
+    ),
+    path(
+        'lastik-envanteri/<int:pk>/cancel/',
+        lastik_envanteri_cancel,
+        name='lastik-envanteri-cancel'
     ),
 ]
 
