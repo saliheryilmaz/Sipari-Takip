@@ -747,8 +747,8 @@ class LastikEnvanteriCreateView(LoginRequiredMixin, CreateView):
         return kwargs
     
     def form_valid(self, form):
-        # Akü seçildiğinde mevsim alanını boş bırak
-        if form.cleaned_data.get('grup') == 'AKU':
+        # Akü veya Jant seçildiğinde mevsim alanını boş bırak
+        if form.cleaned_data.get('grup') in ['AKU', 'JANT']:
             form.instance.mevsim = None
         
         # Oluşturan kullanıcıyı ayarla
@@ -780,8 +780,8 @@ class LastikEnvanteriUpdateView(LoginRequiredMixin, UpdateView):
         return LastikEnvanteriUpdateForm
     
     def form_valid(self, form):
-        # Akü seçildiğinde mevsim alanını boş bırak
-        if form.cleaned_data.get('grup') == 'AKU':
+        # Akü veya Jant seçildiğinde mevsim alanını boş bırak
+        if form.cleaned_data.get('grup') in ['AKU', 'JANT']:
             form.instance.mevsim = None
         return super().form_valid(form)
 

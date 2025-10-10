@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% block title %}
-    {% if object %}Lastik Envanteri Düzenle{% else %}Yeni Lastik Ekle{% endif %}
+    {% if object %}Sipariş Envanteri Düzenle{% else %}Yeni Sipariş Ekle{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -167,14 +167,14 @@
                     <ol class="breadcrumb m-0">
                         <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Ana Sayfa</a></li>
                         <li class="breadcrumb-item"><a href="{% url 'lastik-dashboard' %}">Lastik Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'lastik-envanteri-list' %}">Lastik Envanteri</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'lastik-envanteri-list' %}">Sipariş Envanteri</a></li>
                         <li class="breadcrumb-item active">
                             {% if object %}Düzenle{% else %}Yeni Ekle{% endif %}
                         </li>
                     </ol>
                 </div>
                 <h4 class="page-title">
-                    {% if object %}Lastik Envanteri Düzenle{% else %}Yeni Lastik Ekle{% endif %}
+                    {% if object %}Sipariş Envanteri Düzenle{% else %}Yeni Sipariş Ekle{% endif %}
                 </h4>
             </div>
         </div>
@@ -185,7 +185,7 @@
             <div class="card form-container">
                 <div class="card-header">
                     <h4 class="card-title">
-                        {% if object %}Lastik Envanteri Düzenle{% else %}Yeni Lastik Ekle{% endif %}
+                        {% if object %}Sipariş Envanteri Düzenle{% else %}Yeni Sipariş Ekle{% endif %}
                     </h4>
                 </div>
                 <div class="card-body">
@@ -300,7 +300,7 @@
                                     <!-- Düzenleme sırasında: Tüm durum seçenekleri -->
                                     <label for="{{ form.durum.id_for_label }}" class="form-label">{{ form.durum.label }}</label>
                                     {{ form.durum }}
-                                    <small class="form-text text-muted">Lastiğin mevcut durumunu seçin</small>
+                                    <small class="form-text text-muted">Siparişin mevcut durumunu seçin</small>
                                     {% if form.durum.errors %}
                                         <div class="text-danger">{{ form.durum.errors }}</div>
                                     {% endif %}
@@ -469,8 +469,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Grup seçimine göre mevsim alanını kontrol et
     function toggleMevsimField() {
-        if (grupSelect.value === 'AKU') {
-            // Akü seçildiğinde mevsim alanını gizle ve "-" değeri ata
+        if (grupSelect.value === 'AKU' || grupSelect.value === 'JANT') {
+            // Akü veya Jant seçildiğinde mevsim alanını gizle ve boş değer ata
             mevsimField.style.display = 'none';
             mevsimSelect.value = ''; // Boş değer ata
         } else {

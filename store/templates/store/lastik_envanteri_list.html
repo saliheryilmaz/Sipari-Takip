@@ -88,11 +88,11 @@
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
                         <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Ana Sayfa</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'lastik-dashboard' %}">Lastik Dashboard</a></li>
-                        <li class="breadcrumb-item active">Lastik Envanteri</li>
+                        <li class="breadcrumb-item"><a href="{% url 'lastik-dashboard' %}">Sipariş Dashboard</a></li>
+                        <li class="breadcrumb-item active">Sipariş Envanteri</li>
                     </ol>
                 </div>
-                <h4 class="page-title">Lastik Envanteri Listesi</h4>
+                <h4 class="page-title">Sipariş Envanteri Listesi</h4>
             </div>
         </div>
     </div>
@@ -183,7 +183,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Lastik Envanteri</h4>
+                    <h4 class="card-title">Sipariş Envanteri</h4>
                     <div class="card-actions">
                         <a href="{% url 'lastik-envanteri-create' %}" class="btn btn-success btn-sm">Yeni Lastik Ekle</a>
                         <a href="{% url 'lastik-dashboard' %}" class="btn btn-info btn-sm">Dashboard</a>
@@ -265,7 +265,7 @@
                                             <a href="{% url 'lastik-envanteri-update' lastik.pk %}" class="btn btn-sm btn-warning">
                                                 Düzenle
                                             </a>
-                                            <button onclick="whatsappGonder({{ lastik.pk }})" class="btn btn-sm btn-success">
+                                            <button onclick="whatsappGonder('{{ lastik.pk }}')" class="btn btn-sm btn-success">
                                                 WhatsApp
                                             </button>
                                             <a href="{% url 'lastik-envanteri-delete' lastik.pk %}" class="btn btn-sm btn-danger" onclick="return confirm('Bu lastiği silmek istediğinizden emin misiniz?')">
@@ -324,7 +324,7 @@ function whatsappGonder(lastikId) {
     fetch(`/lastik-envanteri/${lastikId}/whatsapp/`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
             'Content-Type': 'application/json',
         },
     })
