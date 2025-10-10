@@ -11,7 +11,7 @@
     <div class="h-screen flex-grow-1 overflow-y-lg-auto">
         <!-- Main -->
         <main class="py-6 bg-surface-secondary">
-            <div class="container-fluid">
+            <div class="container-fluid px-2 px-md-4">
                 <!-- Yıl Filtresi -->
                 <div class="row mb-4">
                     <div class="col-12">
@@ -43,7 +43,7 @@
                 </div>
                 
                 <!-- Card stats -->
-                <div class="row g-3 g-md-4 g-lg-6 mb-4 mb-md-6">
+                <div class="row g-2 g-md-3 mb-3">
                     <style>
                         a {
                             text-decoration: none;
@@ -59,12 +59,12 @@
                         }
 
                         .card-body {
-                            padding: 1rem;
+                            padding: 0.75rem;
                         }
 
                         @media (max-width: 576px) {
                             .card-body {
-                                padding: 0.75rem;
+                                padding: 0.5rem;
                             }
                             
                             .h3 {
@@ -76,10 +76,29 @@
                             }
                         }
 
+                        /* Container genişlik optimizasyonları */
+                        .container-fluid {
+                            max-width: 98%;
+                            margin: 0 auto;
+                        }
+                        
+                        @media (min-width: 1200px) {
+                            .container-fluid {
+                                max-width: 95%;
+                            }
+                        }
+                        
+                        @media (min-width: 1400px) {
+                            .container-fluid {
+                                max-width: 92%;
+                            }
+                        }
+                        
                         @media (max-width: 768px) {
                             .container-fluid {
-                                padding-left: 15px;
-                                padding-right: 15px;
+                                padding-left: 8px;
+                                padding-right: 8px;
+                                max-width: 100%;
                             }
                         }
                     </style>
@@ -186,7 +205,7 @@
                 </div>
                 
                 <!-- İkinci satır - Lastik Envanteri -->
-                <div class="row g-3 g-md-4 g-lg-6 mb-4 mb-md-6">
+                <div class="row g-2 g-md-3 mb-3">
                     <div class="col-xl-3 col-sm-6 col-12" id="lastik-envanteri">
                         <a href="{% url 'lastik-dashboard' %}">
                             <div class="card shadow border-0">

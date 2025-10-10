@@ -1,5 +1,5 @@
-<div class="row">
-    <div class="card shadow border-0 mb-7 col-md-6 col-lg-6">
+<div class="row g-2 mb-3">
+    <div class="card shadow border-0 col-md-6 col-lg-6">
         <div class="card-body">
             <h5 class="card-title">Lastik Satış Analizi (3D)</h5>
             <div class="chart-container">
@@ -7,7 +7,7 @@
             </div>
         </div>
     </div>
-    <div class="card shadow border-0 mb-7 col-md-6 col-lg-6">
+    <div class="card shadow border-0 col-md-6 col-lg-6">
         <div class="card-body">
             <h5 class="card-title">Lastik Marka Dağılımı (Toplam Adet)</h5>
             <div class="chart-container">
@@ -17,8 +17,8 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="card shadow border-0 mb-7 col-md-6 col-lg-6">
+<div class="row g-2 mb-3">
+    <div class="card shadow border-0 col-md-6 col-lg-6">
         <div class="card-body">
             <h5 class="card-title">Ödeme Durum Dağılımı (Toplam Fiyat)</h5>
             <div class="chart-container">
@@ -26,7 +26,7 @@
             </div>
         </div>
     </div>
-    <div class="card shadow border-0 mb-7 col-md-6 col-lg-6">
+    <div class="card shadow border-0 col-md-6 col-lg-6">
         <div class="card-body">
             <h5 class="card-title">En Çok Alım Yaptığımız Cariler</h5>
             <div class="chart-container">
@@ -40,32 +40,32 @@
   <style>
     .chart-container {
       position: relative;
-      height: 400px;
+      height: 300px;
       width: 100%;
     }
     
     /* Responsive chart containers */
     @media (max-width: 1199px) {
       .chart-container {
-        height: 350px;
+        height: 280px;
       }
     }
     
     @media (max-width: 991px) {
       .chart-container {
-        height: 300px;
+        height: 250px;
       }
     }
     
     @media (max-width: 767px) {
       .chart-container {
-        height: 250px;
+        height: 220px;
       }
     }
     
     @media (max-width: 575px) {
       .chart-container {
-        height: 200px;
+        height: 180px;
       }
     }
     
@@ -540,6 +540,32 @@
   </script>
 
   <style>
+  /* Container genişlik optimizasyonları */
+  .container-fluid {
+    max-width: 98%;
+    margin: 0 auto;
+  }
+  
+  @media (min-width: 1200px) {
+    .container-fluid {
+      max-width: 95%;
+    }
+  }
+  
+  @media (min-width: 1400px) {
+    .container-fluid {
+      max-width: 92%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .container-fluid {
+      padding-left: 8px;
+      padding-right: 8px;
+      max-width: 100%;
+    }
+  }
+  
   .chart-container {
     position: relative;
     width: 100%;
