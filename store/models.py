@@ -156,6 +156,7 @@ class LastikEnvanteri(SoftDeletableModel, TimeStampedModel):
         ('BINEK', 'Binek'),
         ('TICARI', 'Ticari'),
         ('AKU', 'Akü'),
+        ('JANT', 'Jant'),
     ]
     
     MEVSIM_CHOICES = [

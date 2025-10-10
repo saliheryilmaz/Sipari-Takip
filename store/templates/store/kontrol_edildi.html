@@ -97,7 +97,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Kontrol Edildi Durumundaki Lastikler</h4>
+                    <h4 class="card-title">Kontrol Edilen Siparişler</h4>
                     <div class="card-actions">
                         <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}_export=xlsx" class="btn btn-warning btn-sm">
                             <i class="fa-solid fa-download me-2"></i>Excel'e Aktar
@@ -196,8 +196,8 @@
                     {% else %}
                         <div class="text-center py-5">
                             <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                            <h5>Kontrol Edildi Durumunda Lastik Bulunmuyor</h5>
-                            <p class="text-muted">Henüz "Kontrol Edildi" durumunda lastik bulunmamaktadır.</p>
+                            <h5>Kontrol Edildi Durumunda Sipariş Bulunmuyor</h5>
+                            <p class="text-muted">Henüz "Kontrol Edildi" durumunda sipariş bulunmamaktadır.</p>
                             <a href="{% url 'lastik-envanteri-list' %}" class="btn btn-primary">
                                 <i class="fas fa-arrow-left me-2"></i>Lastik Envanteri'ne Dön
                             </a>
