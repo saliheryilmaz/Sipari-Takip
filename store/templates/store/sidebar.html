@@ -224,7 +224,7 @@
             {% if request.user.is_superuser or request.user.profile.role == 'AD' or request.user.profile.role == 'EX' %}
             <li class="nav-item mb-2">
                 <a class="nav-link text-light {% if request.resolver_match.url_name == 'purchaseslist' %}active{% endif %}" href="{% url 'purchaseslist' %}">
-                    <i class="fa fa-shopping-cart me-2"></i> Purchase Orders
+                    <i class="fa-solid fa-car me-2"></i> Çıkma Lastikler
                 </a>
             </li>
             <li class="nav-item mb-2">

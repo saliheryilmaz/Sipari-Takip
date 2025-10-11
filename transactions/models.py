@@ -7,6 +7,19 @@ from accounts.models import Vendor, Customer
 
 DELIVERY_CHOICES = [("P", "Pending"), ("S", "Successful")]
 
+DURUM_CHOICES = [
+    ("COK_IYI", "Çok İyi"),
+    ("IYI", "İyi"),
+    ("ORTA", "Orta"),
+    ("KOTU", "Kötü"),
+]
+
+MEVSIM_CHOICES = [
+    ("YAZ", "Yaz"),
+    ("KIS", "Kış"),
+    ("4MEVSIM", "4 Mevsim"),
+]
+
 
 class Sale(SoftDeletableModel, TimeStampedModel):
     """
@@ -116,11 +129,11 @@ class Purchase(SoftDeletableModel, TimeStampedModel):
     including vendor details and delivery status.
     """
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Kullanıcı')
-    slug = AutoSlugField(unique=True, populate_from="vendor")
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    slug = AutoSlugField(unique=False, populate_from="urun", null=True, blank=True)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
     description = models.TextField(max_length=300, blank=True, null=True)
     vendor = models.ForeignKey(
-        Vendor, related_name="purchases", on_delete=models.CASCADE
+        Vendor, related_name="purchases", on_delete=models.CASCADE, null=True, blank=True
     )
     order_date = models.DateTimeField(auto_now_add=True)
     delivery_date = models.DateTimeField(
@@ -140,6 +153,57 @@ class Purchase(SoftDeletableModel, TimeStampedModel):
         verbose_name="Price per item (Ksh)",
     )
     total_value = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # Tire-specific fields
+    durum = models.CharField(
+        max_length=20,
+        choices=DURUM_CHOICES,
+        default="IYI",
+        verbose_name="Durum",
+        help_text="Lastik durumu"
+    )
+    marka = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Marka",
+        help_text="Lastik markası"
+    )
+    urun = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        verbose_name="Ürün (Lastik Marka Model)",
+        help_text="Lastik marka ve modeli"
+    )
+    dot = models.CharField(
+        max_length=4,
+        blank=True,
+        null=True,
+        verbose_name="DOT",
+        help_text="Lastik üretim yılı (örn: 2025)"
+    )
+    giris_tarihi = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Giriş Tarihi",
+        help_text="Lastiğin depoya giriş tarihi"
+    )
+    mevsim = models.CharField(
+        max_length=20,
+        choices=MEVSIM_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="Mevsim",
+        help_text="Lastik mevsimi"
+    )
+    aciklama = models.TextField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name="Açıklama",
+        help_text="Ek açıklamalar"
+    )
 
     def save(self, *args, **kwargs):
         """
@@ -147,15 +211,21 @@ class Purchase(SoftDeletableModel, TimeStampedModel):
         """
         self.total_value = self.price * self.quantity
         super().save(*args, **kwargs)
-        # Update the item quantity
-        self.item.quantity += self.quantity
-        self.item.save()
+        # Update the item quantity only if item exists
+        if self.item:
+            self.item.quantity += self.quantity
+            self.item.save()
 
     def __str__(self):
         """
         Returns a string representation of the Purchase instance.
         """
-        return str(self.item.name)
+        if self.urun:
+            return self.urun
+        elif self.item:
+            return str(self.item.name)
+        else:
+            return f"Purchase #{self.id}"
 
     class Meta:
         ordering = ["order_date"]

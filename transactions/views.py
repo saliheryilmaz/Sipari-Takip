@@ -4,6 +4,7 @@ import logging
 
 # Django core imports
 from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.shortcuts import render
 from django.db import transaction
@@ -363,3 +364,45 @@ class PurchaseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         Allow deletion only for superusers.
         """
         return self.request.user.is_superuser
+
+
+@csrf_exempt
+def get_purchase_data(request, purchase_id):
+    """
+    AJAX endpoint to get purchase data for printing.
+    """
+    try:
+        purchase = Purchase.objects.get(id=purchase_id)
+        
+        # Durum seçeneklerini Türkçe'ye çevir
+        durum_choices = {
+            'COK_IYI': 'Çok İyi',
+            'IYI': 'İyi', 
+            'ORTA': 'Orta',
+            'KOTU': 'Kötü'
+        }
+        
+        mevsim_choices = {
+            'YAZ': 'Yaz',
+            'KIS': 'Kış',
+            'SONBAHAR': 'Sonbahar',
+            '4MEVSIM': '4 Mevsim'
+        }
+        
+        data = {
+            'durum': durum_choices.get(purchase.durum, purchase.durum),
+            'marka': purchase.marka or '-',
+            'adet': purchase.quantity or 0,
+            'urun': purchase.urun or '-',
+            'dot': purchase.dot or '-',
+            'girisTarihi': purchase.giris_tarihi.strftime('%d.%m.%Y %H:%M') if purchase.giris_tarihi else '-',
+            'mevsim': mevsim_choices.get(purchase.mevsim, purchase.mevsim or '-'),
+            'aciklama': purchase.aciklama or '-'
+        }
+        
+        return JsonResponse(data)
+        
+    except Purchase.DoesNotExist:
+        return JsonResponse({'error': 'Purchase not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

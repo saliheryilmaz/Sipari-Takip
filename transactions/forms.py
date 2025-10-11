@@ -19,26 +19,54 @@ class PurchaseForm(BootstrapMixin, forms.ModelForm):
     class Meta:
         model = Purchase
         fields = [
-            'item',  'price', 'description', 'vendor',
-            'quantity', 'delivery_date', 'delivery_status'
+            'durum', 'marka', 'quantity', 'urun', 'dot', 'giris_tarihi', 'mevsim', 'aciklama'
         ]
+        labels = {
+            'durum': 'Durum',
+            'marka': 'Marka',
+            'quantity': 'Adet',
+            'urun': 'Ürün (Lastik Marka Model)',
+            'dot': 'DOT (Yıl)',
+            'giris_tarihi': 'Giriş Tarihi',
+            'mevsim': 'Mevsim',
+            'aciklama': 'Detaylı Açıklama',
+        }
+        help_texts = {
+            'durum': 'Lastiğin genel durumunu seçin',
+            'marka': 'Lastik markasını girin',
+            'quantity': 'Lastik adet sayısını girin',
+            'urun': 'Lastik marka ve modelini girin',
+            'dot': 'Lastik üretim yılını girin (örn: 2025)',
+            'giris_tarihi': 'Lastiğin depoya giriş tarihini seçin',
+            'mevsim': 'Lastik mevsimini seçin',
+            'aciklama': 'Ek notlar ve açıklamalar',
+        }
         widgets = {
-            'delivery_date': forms.DateInput(
+            'giris_tarihi': forms.DateInput(
                 attrs={
                     'class': 'form-control',
                     'type': 'datetime-local'
                 }
             ),
-            'description': forms.Textarea(
-                attrs={'rows': 1, 'cols': 40}
+            'aciklama': forms.Textarea(
+                attrs={'rows': 3, 'cols': 40, 'placeholder': 'Detaylı açıklama ve notlar...'}
             ),
             'quantity': forms.NumberInput(
+                attrs={'class': 'form-control', 'min': '1', 'placeholder': 'Adet sayısı'}
+            ),
+            'durum': forms.Select(
                 attrs={'class': 'form-control'}
             ),
-            'delivery_status': forms.Select(
-                attrs={'class': 'form-control'}
+            'marka': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Örn: Michelin, Bridgestone...'}
             ),
-            'price': forms.NumberInput(
+            'urun': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Örn: Michelin Pilot Sport 4 225/45R17'}
+            ),
+            'dot': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': '2025', 'maxlength': '4', 'pattern': '[0-9]{4}'}
+            ),
+            'mevsim': forms.Select(
                 attrs={'class': 'form-control'}
             ),
         }

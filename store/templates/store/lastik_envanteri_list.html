@@ -35,7 +35,31 @@
         font-size: 0.75rem;
     }
 
+    /* Container genişlik optimizasyonları */
+    .container-fluid {
+        max-width: 98%;
+        margin: 0 auto;
+    }
+    
+    @media (min-width: 1200px) {
+        .container-fluid {
+            max-width: 95%;
+        }
+    }
+    
+    @media (min-width: 1400px) {
+        .container-fluid {
+            max-width: 92%;
+        }
+    }
+    
     @media (max-width: 768px) {
+        .container-fluid {
+            padding-left: 8px;
+            padding-right: 8px;
+            max-width: 100%;
+        }
+        
         .table-responsive {
             font-size: 0.875rem;
         }
@@ -81,7 +105,7 @@
     }
 </style>
 
-<div class="container-fluid">
+<div class="container-fluid px-2 px-md-4">
     <div class="row">
         <div class="col-12">
             <div class="page-title-box">

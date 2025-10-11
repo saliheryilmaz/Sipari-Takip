@@ -1,56 +1,215 @@
 {% extends "store/base.html" %}
 {% load static %}{% load crispy_forms_tags %}
-{% block title %}Update purchase transaction{% endblock %}
+{% block title %}Lastik Çıkış Kaydı{% endblock %}
 {% block content %}
 <div class="container p-5">
-    <h2>Create or Update Purchase</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
-        <div class="row mt-5">
-            <div class="form-group col-md-4">
-                {{ form.item.label_tag }}
-                {{ form.item }}
-                {{ form.item.errors }}
-            </div>
-            <div class="form-group col-md-4">
-                {{ form.vendor.label_tag }}
-                {{ form.vendor }}
-                {{ form.vendor.errors }}
-            </div>
-            <div class="form-group col-md-4">
-                {{ form.description.label_tag }}
-                {{ form.description }}
-                {{ form.description.errors }}
-            </div>
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h2 class="mb-0">
+                <i class="fas fa-tire"></i> Lastik Çıkış Kaydı Oluştur/Düzenle
+            </h2>
         </div>
-        <div class="row">
-            <div class="form-group col-md-6">
-                {{ form.delivery_date.label_tag }}
-                {{ form.delivery_date }}
-                {{ form.delivery_date.errors }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.quantity.label_tag }}
-                {{ form.quantity }}
-                {{ form.quantity.errors }}
-            </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                
+                <!-- Lastik Çıkış Bilgileri -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="text-primary border-bottom pb-2">
+                            <i class="fas fa-tire"></i> Lastik Çıkış Bilgileri
+                        </h5>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group col-md-3">
+                        <label for="{{ form.durum.id_for_label }}" class="form-label">
+                            <i class="fas fa-star"></i> Durum
+                        </label>
+                        {{ form.durum }}
+                        {{ form.durum.errors }}
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="{{ form.marka.id_for_label }}" class="form-label">
+                            <i class="fas fa-tag"></i> Marka
+                        </label>
+                        {{ form.marka }}
+                        {{ form.marka.errors }}
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                            <i class="fas fa-hashtag"></i> Adet
+                        </label>
+                        {{ form.quantity }}
+                        {{ form.quantity.errors }}
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="{{ form.dot.id_for_label }}" class="form-label">
+                            <i class="fas fa-calendar-alt"></i> DOT (Yıl)
+                        </label>
+                        {{ form.dot }}
+                        {{ form.dot.errors }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group col-md-12">
+                        <label for="{{ form.mevsim.id_for_label }}" class="form-label">
+                            <i class="fas fa-snowflake"></i> Mevsim
+                        </label>
+                        {{ form.mevsim }}
+                        {{ form.mevsim.errors }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.urun.id_for_label }}" class="form-label">
+                            <i class="fas fa-tire"></i> Ürün (Lastik Marka Model)
+                        </label>
+                        {{ form.urun }}
+                        {{ form.urun.errors }}
+                        
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.giris_tarihi.id_for_label }}" class="form-label">
+                            <i class="fas fa-calendar-check"></i> Giriş Tarihi
+                        </label>
+                        {{ form.giris_tarihi }}
+                        {{ form.giris_tarihi.errors }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group col-12">
+                        <label for="{{ form.aciklama.id_for_label }}" class="form-label">
+                            <i class="fas fa-sticky-note"></i> Detaylı Açıklama
+                        </label>
+                        {{ form.aciklama }}
+                        {{ form.aciklama.errors }}
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-12 text-center">
+                        <button type="submit" class="btn btn-success btn-lg px-5">
+                            <i class="fas fa-save"></i> Kaydet
+                        </button>
+                        <a href="{% url 'purchaseslist' %}" class="btn btn-secondary btn-lg px-5 ms-3">
+                            <i class="fas fa-arrow-left"></i> Geri Dön
+                        </a>
+                    </div>
+                </div>
+            </form>
         </div>
-        <div class="row">
-            <div class="form-group col-md-4">
-                {{ form.delivery_status.label_tag }}
-                {{ form.delivery_status }}
-                {{ form.delivery_status.errors }}
-            </div>
-            <div class="form-group col-md-4">
-                {{ form.price.label_tag }}
-                {{ form.price }}
-                {{ form.price.errors }}
-            </div>
-        </div>
-        <button type="submit" class="mt-3 btn btn-primary">
-            <i class="fas fa-save"></i> Save
-        </button>
-    </form>
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const urunInput = document.querySelector('input[name="urun"]');
+    
+    if (urunInput) {
+        urunInput.addEventListener('input', function(e) {
+            let value = e.target.value;
+            
+            // Lastik boyut formatını düzenle
+            // 2055516 t005 -> 205/55R16 t005
+            // 2055516t005 -> 205/55R16 t005
+            // 205/55/16 t005 -> 205/55R16 t005
+            
+            // Önce boşlukları normalize et
+            value = value.replace(/\s+/g, ' ').trim();
+            
+            // Lastik boyut pattern'ini bul ve düzenle
+            // 6 haneli sayı (örn: 2055516) veya 3/2/2 formatını (205/55/16) yakala
+            const tireSizePattern = /(\d{3})(\d{2})(\d{2})|(\d{3})\/(\d{2})\/(\d{2})/;
+            const match = value.match(tireSizePattern);
+            
+            if (match) {
+                let formattedSize;
+                if (match[1] && match[2] && match[3]) {
+                    // 2055516 formatı
+                    formattedSize = `${match[1]}/${match[2]}R${match[3]}`;
+                } else if (match[4] && match[5] && match[6]) {
+                    // 205/55/16 formatı
+                    formattedSize = `${match[4]}/${match[5]}R${match[6]}`;
+                }
+                
+                if (formattedSize) {
+                    // Orijinal değeri yeni formatla değiştir
+                    value = value.replace(tireSizePattern, formattedSize);
+                    e.target.value = value;
+                }
+            }
+        });
+        
+        // Form submit edilirken de kontrol et
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let value = urunInput.value;
+                
+                // Son kontrol ve düzenleme
+                const tireSizePattern = /(\d{3})(\d{2})(\d{2})|(\d{3})\/(\d{2})\/(\d{2})/;
+                const match = value.match(tireSizePattern);
+                
+                if (match) {
+                    let formattedSize;
+                    if (match[1] && match[2] && match[3]) {
+                        formattedSize = `${match[1]}/${match[2]}R${match[3]}`;
+                    } else if (match[4] && match[5] && match[6]) {
+                        formattedSize = `${match[4]}/${match[5]}R${match[6]}`;
+                    }
+                    
+                    if (formattedSize) {
+                        value = value.replace(tireSizePattern, formattedSize);
+                        urunInput.value = value;
+                    }
+                }
+            });
+        }
+    }
+});
+</script>
+
+<style>
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.card {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+</style>
 {% endblock %}

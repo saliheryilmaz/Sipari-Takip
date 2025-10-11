@@ -26,13 +26,13 @@ class PurchaseTable(tables.Table):
         model = Purchase
         template_name = "django_tables2/semantic.html"
         fields = (
-            'item',
-            'vendor',
-            'order_date',
-            'delivery_date',
+            'durum',
+            'marka',
             'quantity',
-            'delivery_status',
-            'price',
-            'total_value'
+            'urun',
+            'dot',
+            'giris_tarihi',
+            'mevsim',
+            'aciklama'
         )
         order_by_field = 'sort'

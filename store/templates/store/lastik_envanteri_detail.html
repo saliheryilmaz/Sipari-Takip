@@ -5,6 +5,9 @@
 {% block title %}Lastik Envanteri Detayı{% endblock %}
 
 {% block content %}
+<!-- CSRF Token for JavaScript -->
+{% csrf_token %}
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -179,7 +182,7 @@ function whatsappGonder(lastikId) {
     fetch(`/lastik-envanteri/${lastikId}/whatsapp/`, {
         method: 'GET',
         headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
             'Content-Type': 'application/json',
         },
     })

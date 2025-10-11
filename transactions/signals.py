@@ -9,6 +9,6 @@ def update_item_quantity(sender, instance, created, **kwargs):
     """
     Signal to update item quantity when a purchase is made.
     """
-    if created:
+    if created and instance.item and instance.quantity:
         instance.item.quantity += instance.quantity
         instance.item.save()
